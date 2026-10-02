@@ -123,6 +123,8 @@
   .chip:active { transform: scale(.97); }
   .chip[aria-pressed="true"] { border-color: var(--blood); background: #3a1714; }
   .chip canvas { display: block; }
+  .chip.locked { opacity: .45; }
+  .chip.locked:hover { border-color: var(--line); }
 
   /* ---------- Personnalisation ---------- */
   #form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -218,7 +220,7 @@
     <p class="lede">Un bonhomme à cribler de balles, à faire exploser et à démembrer quand le boulot devient trop lourd. Mets-lui la tête de ton choix et défoule-toi.</p>
     <div class="actions">
       <button class="play" type="button" data-play>▶ Jouer</button>
-      <p class="stats">💥 <b id="total">0</b> coups · 💀 <b id="ko">0</b> K.O.</p>
+      <p class="stats">⭐ Niv. <b id="level">1</b> · 💥 <b id="total">0</b> coups · 💀 <b id="ko">0</b> K.O.</p>
     </div>
   </div>
   <div class="stage-card">
@@ -231,7 +233,7 @@
 <main class="wrap">
   <section aria-labelledby="arsenal-title">
     <h2 id="arsenal-title">L'arsenal</h2>
-    <p class="sub">Choisis une arme pour lancer la partie. Mitraillette et lance-flammes : garde le doigt appuyé.</p>
+    <p class="sub">Choisis une arme pour lancer la partie. Gagne de l'XP pour débloquer les suivantes et relève les défis qui changent toutes les 5 minutes.</p>
     <div class="arsenal" id="arsenal"></div>
   </section>
 
@@ -442,15 +444,21 @@
     weapon: 'pistolet',
   });
 
+  // Rangées dans l'ordre où on les débloque (voir D.UNLOCKS dans progress.js).
   D.WEAPONS = [
     { id: 'main', short: 'Attraper', label: 'Attraper et lancer' },
     { id: 'pistolet', short: 'Pistolet', label: 'Pistolet' },
     { id: 'mitraillette', short: 'Mitraillette', label: 'Mitraillette (maintenir le clic)' },
     { id: 'pompe', short: 'Pompe', label: 'Fusil à pompe' },
     { id: 'grenade', short: 'Grenade', label: 'Grenade' },
-    { id: 'dynamite', short: 'Dynamite', label: 'Dynamite' },
-    { id: 'roquette', short: 'Bazooka', label: 'Lance-roquettes' },
+    { id: 'katana', short: 'Katana', label: 'Katana (trancher d\'un geste)' },
     { id: 'flamme', short: 'Flammes', label: 'Lance-flammes (maintenir le clic)' },
+    { id: 'dynamite', short: 'Dynamite', label: 'Dynamite' },
+    { id: 'tronconneuse', short: 'Tronço', label: 'Tronçonneuse (maintenir le clic)' },
+    { id: 'roquette', short: 'Bazooka', label: 'Lance-roquettes' },
+    { id: 'lancegrenades', short: 'Lance-gren.', label: 'Lance-grenades' },
+    { id: 'laser', short: 'Laser', label: 'Laser (maintenir le clic)' },
+    { id: 'frappe', short: 'Frappe', label: 'Frappe aérienne' },
   ];
 
   D.HAIR_STYLES = [
@@ -478,6 +486,12 @@
     dynamite: ['Ça sent la mèche…', 'Tic… tac…', "Quelqu'un peut éteindre ça ?"],
     roquette: ["C'est pas un peu excessif ?!", 'Un bazooka ?! Sérieux ?!'],
     flamme: ['Ça brûle ! Ça brûle !', 'Qui a monté le chauffage ?!', 'Je suis grillé !'],
+    katana: ['Tranché net !', 'Tu te prends pour un samouraï ?', 'Ça coupe bien, ce truc !'],
+    tronconneuse: ['NON NON NON NON !', 'Éteins ça !', "C'est pas un arbre, moi !"],
+    lancegrenades: ['Il en reste combien ?!', 'Ça pleut des grenades !'],
+    laser: ['Ça chauffe !', 'Je vois rouge !', "C'est de la science-fiction, ça !"],
+    frappe: ['Euh… un avion ?', 'Qui a appelé l\'aviation ?!', 'Pas les bombes !'],
+    levelup: ['Tu progresses, hein ?', 'Oh non, il a de nouveaux jouets…'],
     wall: ['Le mur ! LE MUR !', 'Qui a mis ce mur là ?', "Aïe, le bord de l'écran !"],
     detach: ["C'est rien, juste une égratignure !", 'Mon bras !', 'Quelqu\'un a vu ma jambe ?', "J'en avais besoin, de ça !"],
     ko: ['Game over…', 'Dites à ma mère que je l\'aimais…', 'Je reviendrai…'],
@@ -521,6 +535,135 @@
     } catch {
       return null;
     }
+  };
+})();
+
+</script>
+<script>
+/*!
+ * Tout dans le Buffet — extension Chrome
+ * Copyright © 2026 xNoJoker. Tous droits réservés. Voir LICENSE.txt.
+ *
+ * Progression : expérience, niveaux, armes à débloquer, améliorations et défis.
+ */
+(() => {
+  'use strict';
+  const D = (globalThis.Buffet = globalThis.Buffet || {});
+  if (D.levelInfo) return;
+
+  // Niveau requis pour chaque arme.
+  D.UNLOCKS = {
+    main: 1, pistolet: 1, mitraillette: 2, pompe: 3, grenade: 4, katana: 5, flamme: 6,
+    dynamite: 7, tronconneuse: 8, roquette: 9, lancegrenades: 11, laser: 13, frappe: 15,
+  };
+  D.MAX_LEVEL = 30;
+  D.CHALLENGE_PERIOD = 5 * 60 * 1000;
+
+  // Progression rapide : environ 1 min pour le niveau 2, tout débloqué en moins d'une heure.
+  D.xpForNext = (level) => 300 + 120 * (level - 1);
+
+  D.levelInfo = (xp) => {
+    let level = 1;
+    let rest = Math.max(0, Math.floor(xp));
+    while (level < D.MAX_LEVEL && rest >= D.xpForNext(level)) {
+      rest -= D.xpForNext(level);
+      level++;
+    }
+    const need = level >= D.MAX_LEVEL ? 0 : D.xpForNext(level);
+    return { level, into: rest, need, ratio: need ? rest / need : 1 };
+  };
+
+  D.isUnlocked = (progress, weapon) => D.levelInfo(progress.xp).level >= (D.UNLOCKS[weapon] || 1);
+
+  // Améliorations : 1 point par niveau gagné, 5 rangs maximum par statistique.
+  D.UPGRADES = [
+    { id: 'dmg', label: 'Dégâts', per: 0.15 },
+    { id: 'rate', label: 'Cadence', per: 0.1 },
+    { id: 'power', label: 'Puissance', per: 0.12 },
+  ];
+  D.MAX_UPGRADE = 5;
+
+  D.upgradeRank = (progress, weapon, stat) => progress.upgrades?.[weapon]?.[stat] || 0;
+
+  // Multiplicateur d'une statistique (pour « rate », c'est le délai entre deux tirs).
+  D.mult = (progress, weapon, stat) => {
+    const def = D.UPGRADES.find((u) => u.id === stat);
+    const rank = D.upgradeRank(progress, weapon, stat);
+    return stat === 'rate' ? 1 - def.per * rank : 1 + def.per * rank;
+  };
+
+  D.pointsLeft = (progress) => D.levelInfo(progress.xp).level - 1 - (progress.spent || 0);
+
+  // Les défis en cours sont figés au début de chaque période, pour qu'un passage de niveau ne les change pas.
+  D.PROGRESS_DEFAULT = Object.freeze({ xp: 0, spent: 0, upgrades: {}, quests: { period: 0, list: [], counts: [], done: [] } });
+
+  // Renouvelle les défis si une nouvelle période de 5 minutes a commencé. Renvoie true si c'est le cas.
+  D.refreshQuests = (progress, gore, now = Date.now()) => {
+    const period = D.questPeriod(now);
+    if (progress.quests?.period === period && progress.quests.list?.length) return false;
+    const list = D.questsFor(period, progress, gore);
+    progress.quests = { period, list, counts: list.map(() => 0), done: list.map(() => false) };
+    return true;
+  };
+
+  D.loadProgress = async () => {
+    try {
+      const { progress } = await chrome.storage.local.get('progress');
+      return { ...structuredClone(D.PROGRESS_DEFAULT), ...(progress || {}) };
+    } catch {
+      return structuredClone(D.PROGRESS_DEFAULT);
+    }
+  };
+
+  D.saveProgress = async (progress) => {
+    try { await chrome.storage.local.set({ progress }); } catch { /* contexte invalidé */ }
+  };
+
+  // ---------- Défis (3 nouveaux toutes les 5 minutes) ----------
+
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const QUESTS = [
+    { type: 'hits', steps: [15, 25, 40], xp: 150, text: (n, w) => `Touche-le ${n} fois avec : ${w}` },
+    { type: 'head', steps: [3, 5, 8], xp: 180, text: (n) => `Fais ${n} tirs à la tête` },
+    { type: 'sever', steps: [2, 4, 6], xp: 220, gore: true, text: (n) => `Arrache ${n} membres` },
+    { type: 'ko', steps: [1, 2, 3], xp: 250, text: (n) => `Mets-le K.O. ${n} fois` },
+    { type: 'combo', steps: [10, 15, 20], xp: 200, max: true, text: (n) => `Atteins un combo de ×${n}` },
+    { type: 'explo', steps: [3, 5, 8], xp: 200, needs: 'grenade', text: (n) => `Touche-le avec ${n} explosions` },
+    { type: 'wall', steps: [3, 5, 8], xp: 160, text: (n) => `Envoie-le ${n} fois dans le décor` },
+  ];
+
+  D.questPeriod = (now = Date.now()) => Math.floor(now / D.CHALLENGE_PERIOD);
+  D.questTimeLeft = (now = Date.now()) => D.CHALLENGE_PERIOD - (now % D.CHALLENGE_PERIOD);
+
+  // Les défis sont tirés au hasard à partir de la période : pas besoin de les stocker.
+  D.questsFor = (period, progress, gore) => {
+    const r = rng(period * 2654435761);
+    const level = D.levelInfo(progress.xp).level;
+    const weapons = D.WEAPONS.filter((w) => w.id !== 'main' && D.isUnlocked(progress, w.id));
+    const pool = QUESTS.filter((q) => (!q.gore || gore) && (!q.needs || D.isUnlocked(progress, q.needs)));
+    const picked = [];
+    while (picked.length < 3 && pool.length) {
+      const q = pool.splice(Math.floor(r() * pool.length), 1)[0];
+      const step = Math.min(q.steps.length - 1, Math.floor(r() * q.steps.length) + (level >= 10 ? 1 : 0));
+      const n = q.steps[step];
+      const weapon = q.type === 'hits' ? weapons[Math.floor(r() * weapons.length)] : null;
+      picked.push({
+        type: q.type, n, max: !!q.max, weapon: weapon?.id || null,
+        xp: Math.round(q.xp * (1 + step * 0.4)),
+        text: q.text(n, weapon?.label.split(' (')[0] || ''),
+      });
+    }
+    return picked;
   };
 })();
 
@@ -1310,6 +1453,11 @@
     flamme: { x: -56, y: -16, w: 134, h: 44, muzzle: 68 },
     grenade: { x: -18, y: -24, w: 36, h: 46 },
     dynamite: { x: -18, y: -34, w: 36, h: 56 },
+    katana: { x: -42, y: -12, w: 152, h: 24, muzzle: 108 },
+    tronconneuse: { x: -60, y: -28, w: 152, h: 52, muzzle: 90 },
+    lancegrenades: { x: -62, y: -22, w: 132, h: 56, muzzle: 68 },
+    laser: { x: -48, y: -22, w: 124, h: 52, muzzle: 70 },
+    frappe: { x: -16, y: -32, w: 32, h: 62 },
   };
 
   function shape(ctx, color, draw) {
@@ -1403,6 +1551,71 @@
       rect(ctx, '#dc2626', 5, -16, 10, 34, 3);
       rect(ctx, '#ef4444', -5, -18, 10, 36, 3);
       rect(ctx, '#e7e5e4', -16, -4, 32, 6, 1);
+    },
+    katana(ctx) {
+      // Lame courbe, garde dorée, poignée tressée.
+      shape(ctx, '#e5e7eb', () => {
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(60, -7, 100, -4);
+        ctx.quadraticCurveTo(108, -3, 109, 1);
+        ctx.quadraticCurveTo(60, 2, 0, 3);
+        ctx.closePath();
+      });
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.moveTo(6, -2); ctx.quadraticCurveTo(60, -4, 98, -2); ctx.stroke();
+      ctx.restore();
+      shape(ctx, '#ca8a04', () => ctx.ellipse(-3, 0, 4, 10, 0, 0, Math.PI * 2));
+      rect(ctx, '#18181b', -40, -4, 34, 8, 3);
+      ctx.save();
+      ctx.strokeStyle = '#b91c1c';
+      ctx.beginPath();
+      for (let x = -36; x < -8; x += 7) { ctx.moveTo(x, -3); ctx.lineTo(x + 5, 3); ctx.moveTo(x + 5, -3); ctx.lineTo(x, 3); }
+      ctx.stroke();
+      ctx.restore();
+    },
+    tronconneuse(ctx) {
+      rect(ctx, '#27272a', -58, -10, 14, 22, 5);
+      ctx.save();
+      ctx.lineWidth *= 2.2;
+      ctx.beginPath(); ctx.moveTo(-40, -18); ctx.quadraticCurveTo(-20, -30, -4, -18); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#d1d5db', 4, -8, 86, 16, 8);
+      ctx.save();
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = '#3f3f46';
+      ctx.beginPath(); ctx.roundRect(2, -10, 90, 20, 10); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#f97316', -46, -18, 54, 36, 8);
+      rect(ctx, '#27272a', -34, -6, 20, 12, 3);
+      rect(ctx, '#fde047', -6, -14, 8, 6, 2);
+    },
+    lancegrenades(ctx) {
+      rect(ctx, '#365314', -62, -6, 28, 14, 4);
+      poly(ctx, '#27272a', [-28, 8, -16, 8, -12, 32, -26, 32]);
+      poly(ctx, '#27272a', [22, 10, 32, 10, 34, 26, 24, 26]);
+      rect(ctx, '#4d7c0f', -34, -12, 42, 20, 4);
+      rect(ctx, '#3f3f46', 6, -11, 62, 16, 4);
+      rect(ctx, '#52525b', -22, -20, 32, 32, 12);
+      for (const [x, y] of [[-12, -10], [0, -10], [-12, 2], [0, 2]]) {
+        shape(ctx, '#27272a', () => ctx.arc(x, y, 3.5, 0, Math.PI * 2));
+      }
+      rect(ctx, '#facc15', 50, -11, 5, 16, 1);
+    },
+    laser(ctx) {
+      poly(ctx, '#334155', [-24, 6, -10, 6, -6, 30, -22, 30]);
+      rect(ctx, '#e5e7eb', -42, -12, 74, 20, 9);
+      rect(ctx, '#22d3ee', -32, -4, 54, 4, 2);
+      shape(ctx, '#22d3ee', () => ctx.arc(-28, -14, 7, 0, Math.PI * 2));
+      rect(ctx, '#94a3b8', 30, -9, 32, 14, 4);
+      rect(ctx, '#ef4444', 60, -6, 10, 8, 2);
+    },
+    frappe(ctx) {
+      // Bombe d'avion, nez vers le bas.
+      poly(ctx, '#52525b', [-9, -14, -14, -30, 14, -30, 9, -14]);
+      shape(ctx, '#3f3f46', () => ctx.ellipse(0, 4, 10, 22, 0, 0, Math.PI * 2));
+      rect(ctx, '#facc15', -10, -4, 20, 5, 1);
     },
   };
 
@@ -1652,6 +1865,70 @@
       [523, 659, 784, 1047].forEach((f, i) => this.tone({ f0: f, dur: 0.14, gain: 0.15, delay: i * 0.07 }));
     }
 
+    slash() {
+      this.noise({ dur: 0.14, gain: 0.45, type: 'bandpass', f0: 2500, f1: 6000, q: 2 });
+      this.tone({ type: 'triangle', f0: 1400, f1: 3200, dur: 0.08, gain: 0.06 });
+    }
+
+    launcher() {
+      this.noise({ dur: 0.18, gain: 0.7, f0: 1200, f1: 150 });
+      this.tone({ f0: 120, f1: 60, dur: 0.15, gain: 0.7 });
+    }
+
+    jet() {
+      this.noise({ dur: 1.6, gain: 0.5, type: 'bandpass', f0: 400, f1: 2400, q: 0.6 });
+      this.tone({ type: 'sawtooth', f0: 90, f1: 140, dur: 1.4, gain: 0.08, lp: 500 });
+    }
+
+    whistle() {
+      this.tone({ f0: 1800, f1: 500, dur: 0.9, gain: 0.08 });
+    }
+
+    levelUp() {
+      [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone({ type: 'square', f0: f, dur: 0.16, gain: 0.07, delay: i * 0.08, lp: 3000 }));
+      this.tone({ type: 'triangle', f0: 1047, dur: 0.6, gain: 0.12, delay: 0.42, vibrato: 6 });
+    }
+
+    questDone() {
+      [784, 1047, 1319].forEach((f, i) => this.tone({ f0: f, dur: 0.12, gain: 0.12, delay: i * 0.07 }));
+    }
+
+    denied() {
+      this.tone({ type: 'square', f0: 200, f1: 150, dur: 0.15, gain: 0.06, lp: 1200 });
+    }
+
+    // Moteur ou bourdonnement continu (tronçonneuse, laser).
+    hum(name, { type = 'sawtooth', freq = 90, lfo = 0, depth = 0, gain = 0.12, lp = 1200 } = {}) {
+      if (!this.ok || this.loops[name]) return;
+      const c = this.ensure();
+      if (!c) return;
+      const o = c.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      const stops = [o];
+      if (lfo) {
+        const l = c.createOscillator();
+        const d = c.createGain();
+        l.frequency.value = lfo;
+        d.gain.value = depth;
+        l.connect(d);
+        d.connect(o.frequency);
+        l.start();
+        stops.push(l);
+      }
+      const f = c.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.value = lp;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(gain, c.currentTime + 0.06);
+      o.connect(f);
+      f.connect(g);
+      g.connect(this.master);
+      o.start();
+      this.loops[name] = { src: { stop: (t) => stops.forEach((s) => s.stop(t)) }, g };
+    }
+
     // ---------- Sons continus (lance-flammes) ----------
 
     loopStart(name, { type = 'lowpass', freq = 600, q = 0.7, gain = 0.25 } = {}) {
@@ -1711,14 +1988,22 @@
   const COMIC = 'Impact,"Arial Black","Segoe UI Black",sans-serif';
   const EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
   const GUN_SCALE = 1.1;
-  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme']);
-  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5 };
-  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0 };
+  // Armes tenues en bas à droite de l'écran, qui visent le curseur.
+  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme', 'lancegrenades', 'laser']);
+  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5, lancegrenades: -3, laser: -2 };
+  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0, lancegrenades: 12, laser: 0 };
   const HP_MAX = { head: 90, torso: 160, lArm: 55, rArm: 55, lLeg: 70, rLeg: 70 };
   const BLAST = {
     grenade: { power: 2600, radius: 300, dmg: 110, label: 'BOUM !' },
     dynamite: { power: 3400, radius: 380, dmg: 190, label: 'KABOOM !' },
     roquette: { power: 3000, radius: 280, dmg: 170, label: 'BADABOUM !' },
+    lancegrenades: { power: 2200, radius: 220, dmg: 80, label: 'BOUM !' },
+    frappe: { power: 3000, radius: 260, dmg: 120, label: 'BOOOM !' },
+  };
+  // Expérience gagnée par coup, selon l'arme (multipliée par le combo en cours).
+  const XP_PER_HIT = {
+    pistolet: 6, mitraillette: 3, pompe: 8, grenade: 14, katana: 7, flamme: 2, dynamite: 16,
+    tronconneuse: 3, roquette: 16, lancegrenades: 10, laser: 2, frappe: 12, wall: 5,
   };
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -1756,6 +2041,80 @@
       transition: opacity .3s, transform .3s;
     }
     .hint.on { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Armes verrouillées */
+    .bar button { position: relative; }
+    .bar button.locked { opacity: .4; }
+    .bar .lock {
+      position: absolute; right: 0; bottom: -1px; padding: 1px 3px; border-radius: 6px;
+      background: #18181b; color: #fde047; font: 800 9px/1 system-ui, sans-serif;
+    }
+
+    /* Niveau et expérience */
+    .bar button.lvl {
+      display: grid; gap: 4px; min-width: 70px; padding: 0 10px; border-radius: 14px;
+      font: 800 12px/1 system-ui, "Segoe UI", sans-serif; color: #fde047; text-align: center;
+    }
+    .xpbar { display: block; width: 100%; height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); overflow: hidden; }
+    .xpbar i { display: block; height: 100%; width: 0; background: #fde047; transition: width .3s; }
+
+    /* Défis */
+    .quests {
+      position: absolute; left: 12px; top: 72px; width: 236px; box-sizing: border-box;
+      background: rgba(24, 24, 27, .9); color: #fafafa; border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .3); font: 600 12px/1.3 system-ui, "Segoe UI", sans-serif;
+    }
+    .qhead {
+      all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 9px 11px; cursor: pointer; font-weight: 800;
+    }
+    .qhead:focus-visible { outline: 2px solid #fca5a5; border-radius: 14px; }
+    .qtime { color: #a1a1aa; font-variant-numeric: tabular-nums; }
+    .quests ol { list-style: none; margin: 0; padding: 0 11px 10px; display: grid; gap: 8px; }
+    .quests.closed ol { display: none; }
+    .quests li { display: grid; gap: 4px; }
+    .qrow { display: flex; justify-content: space-between; gap: 8px; }
+    .qxp { color: #fde047; white-space: nowrap; }
+    .qbar { display: block; height: 4px; border-radius: 2px; background: rgba(255,255,255,.18); overflow: hidden; }
+    .qbar i { display: block; height: 100%; background: #22c55e; }
+    .quests li.done { opacity: .55; }
+    .quests li.done .qtext::before { content: "✔ "; color: #22c55e; }
+
+    /* Améliorations */
+    .up { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .55); }
+    .up[hidden] { display: none; }
+    .up-box {
+      width: min(580px, 100%); max-height: min(82vh, 680px); overflow: auto; box-sizing: border-box;
+      background: #18181b; color: #fafafa; border-radius: 18px; padding: 16px 18px;
+      font: 500 14px/1.4 system-ui, "Segoe UI", sans-serif; box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+    }
+    .up-head { display: flex; align-items: center; gap: 12px; }
+    .up-head h2 { margin: 0; font: 800 19px/1.2 system-ui, sans-serif; flex: 1; }
+    .up-pts { color: #fde047; font-weight: 800; white-space: nowrap; }
+    .up-close { all: unset; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: #27272a; }
+    .up-close:focus-visible, .up-stat button:focus-visible { outline: 2px solid #fca5a5; }
+    .up-info { margin: 8px 0 4px; color: #a1a1aa; }
+    .up-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #27272a; }
+    .up-row.locked { opacity: .45; }
+    .up-name { font-weight: 800; margin-bottom: 6px; }
+    .up-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .up-stat { display: flex; align-items: center; gap: 6px; padding: 3px 3px 3px 9px; border-radius: 10px; background: #27272a; font-size: 12px; }
+    .dots { color: #fde047; letter-spacing: 1px; }
+    .up-stat button {
+      all: unset; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px;
+      background: #dc2626; color: #fff; font: 900 16px/1 system-ui, sans-serif; cursor: pointer;
+    }
+    .up-stat button:disabled { background: #3f3f46; color: #71717a; cursor: default; }
+
+    /* Notifications */
+    .toast {
+      position: absolute; left: 50%; top: 78px; transform: translate(-50%, -6px); max-width: calc(100vw - 32px);
+      padding: 10px 16px; border-radius: 12px; background: #fde047; color: #18181b; text-align: center;
+      font: 800 15px/1.25 system-ui, "Segoe UI", sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+      opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+    }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
     /* Petits écrans tactiles : barre sur une ligne, qui défile au doigt. */
     @media (max-width: 720px) {
       .bar {
@@ -1768,6 +2127,9 @@
       .bar button, .bar .count, .bar .sep { flex: none; }
       .bar button { min-width: 44px; height: 44px; }
       .hint { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+      .quests { left: 8px; top: calc(64px + env(safe-area-inset-top, 0px)); width: 206px; font-size: 11px; }
+      .toast { top: calc(64px + env(safe-area-inset-top, 0px)); font-size: 14px; }
+      .up-row { grid-template-columns: 52px minmax(0, 1fr); }
     }
   `;
 
@@ -1813,12 +2175,19 @@
       this.throttle = {};
       this.nextBlink = 0;
       this.blinkUntil = 0;
+      this.progress = structuredClone(D.PROGRESS_DEFAULT);
+      this.toasts = [];
+      this.blade = null;
+      this.bladeAng = -0.7;
+      this.beam = null;
       this.frame = this.frame.bind(this);
       this.build();
     }
 
     async init() {
+      this.progress = await D.loadProgress();
       await this.applySettings(await D.loadSettings());
+      this.renderProgress();
       try {
         chrome.storage.onChanged.addListener((changes, area) => {
           if (area === 'local' && changes.settings) this.applySettings(changes.settings.newValue || {});
@@ -1850,10 +2219,19 @@
       this.ctx = this.canvas.getContext('2d');
 
       this.bar = el('div', { class: 'bar', role: 'toolbar', 'aria-label': D.NAME });
+      const lvl = el('button', { type: 'button', class: 'lvl', title: 'Niveau et améliorations', 'data-a': 'levels' });
+      this.lvlText = el('span', {}, 'Niv. 1');
+      const xpbar = el('span', { class: 'xpbar' });
+      this.xpFill = el('i');
+      xpbar.append(this.xpFill);
+      lvl.append(this.lvlText, xpbar);
+      this.bar.append(lvl);
       this.weaponButtons = {};
       for (const w of D.WEAPONS) {
         const b = el('button', { type: 'button', title: w.label, 'aria-label': w.label, 'data-w': w.id });
         b.append(D.weaponIconCanvas(w.id, w.id === 'main' ? 24 : 36, 24, true));
+        const lock = el('span', { class: 'lock', hidden: '' });
+        b.append(lock);
         this.weaponButtons[w.id] = b;
         this.bar.append(b);
       }
@@ -1870,7 +2248,42 @@
       this.bar.append(el('button', { type: 'button', title: 'Ranger (Échap)', 'aria-label': 'Ranger', 'data-a': 'close' }, '✕'));
       this.hintEl = el('div', { class: 'hint' }, 'Échap pour ranger · 🩹 pour un nouveau personnage');
 
-      root.append(style, this.canvas, this.bar, this.hintEl);
+      // Carte des défis (repliable).
+      this.questsEl = el('div', { class: 'quests' });
+      const qhead = el('button', { type: 'button', class: 'qhead', 'aria-expanded': 'true' });
+      this.qTime = el('span', { class: 'qtime' }, '5:00');
+      qhead.append(el('span', {}, '🎯 Défis'), this.qTime);
+      this.qList = el('ol');
+      this.questsEl.append(qhead, this.qList);
+      qhead.addEventListener('click', () => {
+        const closed = this.questsEl.classList.toggle('closed');
+        qhead.setAttribute('aria-expanded', String(!closed));
+      });
+
+      // Fenêtre des améliorations.
+      this.upEl = el('div', { class: 'up', hidden: '', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Améliorations' });
+      const box = el('div', { class: 'up-box' });
+      const head = el('div', { class: 'up-head' });
+      this.upPts = el('span', { class: 'up-pts' });
+      const close = el('button', { type: 'button', class: 'up-close', 'aria-label': 'Fermer', 'data-a': 'up-close' }, '✕');
+      head.append(el('h2', {}, 'Améliorations'), this.upPts, close);
+      this.upNext = el('p', { class: 'up-info' });
+      const legend = el('p', { class: 'up-info' }, 'Chaque niveau gagné donne 1 point. Dégâts : fait plus mal. Cadence : tire plus vite. Puissance : projette plus fort, explosions et portée plus grandes.');
+      this.upList = el('div');
+      box.append(head, this.upNext, legend, this.upList);
+      this.upEl.append(box);
+      this.upEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (e.target === this.upEl || btn?.dataset.a === 'up-close') { this.closeUpgrades(); return; }
+        if (btn?.dataset.up) {
+          const [weapon, stat] = btn.dataset.up.split(':');
+          this.upgrade(weapon, stat);
+        }
+      });
+
+      this.toastEl = el('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
+
+      root.append(style, this.canvas, this.questsEl, this.bar, this.hintEl, this.toastEl, this.upEl);
       document.documentElement.append(this.host);
 
       this.bar.addEventListener('click', (e) => this.onBar(e));
@@ -1885,7 +2298,8 @@
         if (e.key !== 'Escape') return;
         e.preventDefault();
         e.stopPropagation();
-        this.hide();
+        if (!this.upEl.hidden) this.closeUpgrades();
+        else this.hide();
       };
       this.onResize = () => this.resize();
     }
@@ -1893,7 +2307,15 @@
     onBar(e) {
       const b = e.target.closest('button');
       if (!b) return;
-      if (b.dataset.w) this.setWeapon(b.dataset.w, true);
+      if (b.dataset.w) {
+        const w = D.WEAPONS.find((x) => x.id === b.dataset.w);
+        if (!D.isUnlocked(this.progress, w.id)) {
+          this.sfx.denied();
+          this.toast(`🔒 ${w.short} : débloqué au niveau ${D.UNLOCKS[w.id]}`);
+          return;
+        }
+        this.setWeapon(w.id, true);
+      } else if (b.dataset.a === 'levels') this.openUpgrades();
       else if (b.dataset.a === 'respawn') this.respawn(performance.now());
       else if (b.dataset.a === 'close') this.hide();
       else if (b.dataset.a === 'options') {
@@ -1902,15 +2324,207 @@
     }
 
     setWeapon(id, persist) {
-      if (!D.WEAPONS.some((w) => w.id === id)) id = D.DEFAULTS.weapon;
+      if (!D.WEAPONS.some((w) => w.id === id) || !D.isUnlocked(this.progress, id)) id = D.DEFAULTS.weapon;
       this.settings.weapon = id;
       for (const [wid, btn] of Object.entries(this.weaponButtons)) {
         btn.classList.toggle('on', wid === id);
         btn.setAttribute('aria-pressed', String(wid === id));
       }
       this.canvas.style.cursor = id === 'main' ? 'grab' : 'none';
-      this.sfx.loopStop('flame');
+      this.stopLoops();
       if (persist) D.saveSettings({ weapon: id }).catch(() => {});
+    }
+
+    stopLoops() {
+      for (const name of ['flame', 'saw', 'laser']) this.sfx.loopStop(name);
+      this.beam = null;
+      this.blade = null;
+    }
+
+    // Multiplicateur d'amélioration (dégâts, cadence, puissance) pour une arme.
+    m(stat, weapon = this.settings.weapon) {
+      return D.mult(this.progress, weapon, stat);
+    }
+
+    // ---------- Progression ----------
+
+    saveProgressSoon() {
+      clearTimeout(this.progT);
+      this.progT = setTimeout(() => D.saveProgress(this.progress), 800);
+    }
+
+    renderProgress() {
+      const info = D.levelInfo(this.progress.xp);
+      const pts = D.pointsLeft(this.progress);
+      this.lvlText.textContent = `Niv. ${info.level}${pts > 0 ? ` ★${pts}` : ''}`;
+      this.xpFill.style.width = `${Math.round(info.ratio * 100)}%`;
+      this.lvlText.parentElement.title = info.need
+        ? `Niveau ${info.level} : ${info.into} / ${info.need} XP. Clique pour les améliorations.`
+        : `Niveau maximum. Clique pour les améliorations.`;
+      for (const w of D.WEAPONS) {
+        const btn = this.weaponButtons[w.id];
+        const locked = !D.isUnlocked(this.progress, w.id);
+        btn.classList.toggle('locked', locked);
+        const lock = btn.querySelector('.lock');
+        lock.hidden = !locked;
+        lock.textContent = `🔒${D.UNLOCKS[w.id]}`;
+        btn.title = locked ? `${w.label} · débloqué au niveau ${D.UNLOCKS[w.id]}` : w.label;
+      }
+      if (!this.upEl.hidden) this.renderUpgrades();
+    }
+
+    gainXp(amount, now) {
+      if (!(amount > 0)) return;
+      const before = D.levelInfo(this.progress.xp).level;
+      this.progress.xp += Math.round(amount);
+      const after = D.levelInfo(this.progress.xp).level;
+      if (after > before) this.levelUp(before, after, now);
+      this.saveProgressSoon();
+      this.renderProgress();
+    }
+
+    levelUp(from, to) {
+      this.sfx.levelUp();
+      const c = this.body.center();
+      this.text(c.x, c.y - 170 * this.body.s, `NIVEAU ${to} !`, '#fde047', 64);
+      this.burstStars(c.x, c.y - 120 * this.body.s, 14);
+      const fresh = D.WEAPONS.filter((w) => D.UNLOCKS[w.id] > from && D.UNLOCKS[w.id] <= to);
+      for (const w of fresh) this.toast(`🔓 Nouvelle arme : ${w.short} !`);
+      this.toast(`⭐ Niveau ${to} : +${to - from} point${to - from > 1 ? 's' : ''} d'amélioration`);
+      if (fresh.length) this.say(D.pick(D.PHRASES.levelup), true);
+    }
+
+    questEvent(type, value = 1, weapon = null) {
+      const q = this.progress.quests;
+      if (!q?.list?.length) return;
+      let changed = false;
+      q.list.forEach((quest, i) => {
+        if (q.done[i] || quest.type !== type) return;
+        if (quest.weapon && quest.weapon !== weapon) return;
+        const next = quest.max ? Math.max(q.counts[i], value) : q.counts[i] + value;
+        if (next === q.counts[i]) return;
+        q.counts[i] = Math.min(quest.n, next);
+        changed = true;
+        if (q.counts[i] >= quest.n) {
+          q.done[i] = true;
+          this.sfx.questDone();
+          this.toast(`🎯 Défi réussi : +${quest.xp} XP`);
+          this.gainXp(quest.xp, performance.now());
+        }
+      });
+      if (changed) {
+        this.renderQuests();
+        this.saveProgressSoon();
+      }
+    }
+
+    renderQuests() {
+      const q = this.progress.quests;
+      const list = q?.list || [];
+      if (this.qList.childElementCount !== list.length || this.qList.dataset.period !== String(q.period)) {
+        this.qList.replaceChildren();
+        this.qList.dataset.period = String(q.period);
+        for (const quest of list) {
+          const li = el('li');
+          const row = el('span', { class: 'qrow' });
+          row.append(el('span', { class: 'qtext' }, quest.text), el('span', { class: 'qxp' }, `+${quest.xp} XP`));
+          const bar = el('span', { class: 'qbar' });
+          bar.append(el('i'));
+          li.append(row, bar);
+          this.qList.append(li);
+        }
+      }
+      list.forEach((quest, i) => {
+        const li = this.qList.children[i];
+        li.classList.toggle('done', !!q.done[i]);
+        li.querySelector('.qbar i').style.width = `${Math.round((q.counts[i] / quest.n) * 100)}%`;
+        li.title = `${q.counts[i]} / ${quest.n}`;
+      });
+    }
+
+    tickQuests() {
+      const had = this.progress.quests?.list?.length > 0;
+      if (D.refreshQuests(this.progress, this.settings.gore)) {
+        this.renderQuests();
+        this.saveProgressSoon();
+        if (had && this.visible) this.toast('🎯 Nouveaux défis !');
+      }
+      const left = Math.ceil(D.questTimeLeft() / 1000);
+      const text = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      if (this.qTime.textContent !== text) this.qTime.textContent = text;
+    }
+
+    toast(message) {
+      this.toasts.push(message);
+      if (!this.toastBusy) this.nextToast();
+    }
+
+    nextToast() {
+      const message = this.toasts.shift();
+      if (!message) { this.toastBusy = false; return; }
+      this.toastBusy = true;
+      this.toastEl.textContent = message;
+      this.toastEl.classList.add('on');
+      setTimeout(() => {
+        this.toastEl.classList.remove('on');
+        setTimeout(() => this.nextToast(), 260);
+      }, 1700);
+    }
+
+    openUpgrades() {
+      this.renderUpgrades();
+      this.upEl.hidden = false;
+      this.upEl.querySelector('.up-close').focus();
+    }
+
+    closeUpgrades() {
+      this.upEl.hidden = true;
+    }
+
+    renderUpgrades() {
+      const p = this.progress;
+      const pts = D.pointsLeft(p);
+      const info = D.levelInfo(p.xp);
+      this.upPts.textContent = `⭐ ${pts} point${pts > 1 ? 's' : ''}`;
+      const next = D.WEAPONS.find((w) => D.UNLOCKS[w.id] > info.level);
+      const xpLine = info.need ? `Niveau ${info.level} · ${info.into} / ${info.need} XP` : `Niveau ${info.level} (maximum)`;
+      this.upNext.textContent = next ? `${xpLine} · Prochaine arme : ${next.short} au niveau ${D.UNLOCKS[next.id]}` : `${xpLine} · Toutes les armes sont débloquées !`;
+      this.upList.replaceChildren();
+      for (const w of D.WEAPONS) {
+        if (w.id === 'main') continue;
+        const locked = !D.isUnlocked(p, w.id);
+        const row = el('div', { class: `up-row${locked ? ' locked' : ''}` });
+        row.append(D.weaponIconCanvas(w.id, 56, 28, true));
+        const info2 = el('div');
+        info2.append(el('div', { class: 'up-name' }, locked ? `🔒 ${w.short} · niveau ${D.UNLOCKS[w.id]}` : w.short));
+        if (!locked) {
+          const stats = el('div', { class: 'up-stats' });
+          for (const u of D.UPGRADES) {
+            const rank = D.upgradeRank(p, w.id, u.id);
+            const stat = el('span', { class: 'up-stat' });
+            stat.append(el('span', {}, u.label), el('span', { class: 'dots', 'aria-label': `rang ${rank} sur ${D.MAX_UPGRADE}` }, '●'.repeat(rank) + '○'.repeat(D.MAX_UPGRADE - rank)));
+            const btn = el('button', { type: 'button', 'data-up': `${w.id}:${u.id}`, 'aria-label': `Améliorer ${u.label} : ${w.short}` }, '+');
+            btn.disabled = pts <= 0 || rank >= D.MAX_UPGRADE;
+            stat.append(btn);
+            stats.append(stat);
+          }
+          info2.append(stats);
+        }
+        row.append(info2);
+        this.upList.append(row);
+      }
+    }
+
+    upgrade(weapon, stat) {
+      const p = this.progress;
+      const rank = D.upgradeRank(p, weapon, stat);
+      if (D.pointsLeft(p) <= 0 || rank >= D.MAX_UPGRADE || !D.isUnlocked(p, weapon)) return;
+      p.upgrades = { ...p.upgrades, [weapon]: { ...(p.upgrades[weapon] || {}), [stat]: rank + 1 } };
+      p.spent = (p.spent || 0) + 1;
+      this.sfx.questDone();
+      this.saveProgressSoon();
+      this.renderProgress();
+      this.renderUpgrades();
     }
 
     async applySettings(next) {
@@ -1970,6 +2584,16 @@
       this.decals.length = 0;
       this.lastActivity = now;
       this.say(D.pick(D.PHRASES.enter), true);
+      // Recharge la progression (elle a pu avancer dans un autre onglet).
+      D.loadProgress().then((p) => {
+        if (p.xp >= this.progress.xp) this.progress = p;
+        this.tickQuests();
+        this.renderQuests();
+        this.renderProgress();
+        this.setWeapon(this.settings.weapon, false);
+      });
+      if (this.W < 720 && !this.questsShown) this.questsEl.classList.add('closed');
+      this.questsShown = true;
       this.hintEl.textContent = matchMedia('(pointer: coarse)').matches
         ? '✕ pour quitter · 🩹 pour un nouveau personnage'
         : 'Échap pour ranger · 🩹 pour un nouveau personnage';
@@ -1996,7 +2620,10 @@
       this.objects.length = 0;
       this.particles.length = 0;
       this.pools.length = 0;
+      this.closeUpgrades();
       this.flushStats();
+      clearTimeout(this.progT);
+      D.saveProgress(this.progress);
     }
 
     toggle() {
@@ -2038,13 +2665,18 @@
           }
           break;
         }
-        case 'pistolet': if (this.every('shot', 160, now)) this.shoot('pistolet', now); break;
+        case 'pistolet': if (this.every('shot', 160 * this.m('rate'), now)) this.shoot('pistolet', now); break;
         case 'mitraillette': this.shoot('mitraillette', now); this.throttle.smg = now; break;
-        case 'pompe': if (this.every('shot', 800, now)) this.shoot('pompe', now); break;
-        case 'roquette': if (this.every('shot', 900, now)) this.launchRocket(x, y, now); break;
+        case 'pompe': if (this.every('shot', 800 * this.m('rate'), now)) this.shoot('pompe', now); break;
+        case 'roquette': if (this.every('shot', 900 * this.m('rate'), now)) this.launchRocket(x, y, now); break;
+        case 'lancegrenades': if (this.every('shot', 650 * this.m('rate'), now)) this.launchGrenade(x, y); break;
         case 'grenade': this.throwGrenade(x, y, now); break;
         case 'dynamite': this.placeDynamite(x, y, now); break;
+        case 'frappe': if (this.every('shot', 3500 * this.m('rate'), now)) this.airStrike(x, now); else this.sfx.denied(); break;
         case 'flamme': this.sfx.loopStart('flame', { freq: 700, gain: 0.3 }); break;
+        case 'katana': this.blade = { x, y }; break;
+        case 'tronconneuse': this.sfx.hum('saw', { type: 'sawtooth', freq: 70, lfo: 28, depth: 25, gain: 0.14, lp: 1400 }); break;
+        case 'laser': this.sfx.hum('laser', { type: 'sine', freq: 880, lfo: 9, depth: 40, gain: 0.07, lp: 4000 }); break;
       }
     }
 
@@ -2064,7 +2696,7 @@
         if (fast) this.say(D.pick(D.PHRASES.throw), true);
         this.canvas.style.cursor = 'grab';
       }
-      this.sfx.loopStop('flame');
+      this.stopLoops();
     }
 
     // ---------- Armes à feu ----------
@@ -2087,17 +2719,17 @@
       let hits = 0;
       if (kind === 'pompe') {
         for (let i = 0; i < 8; i++) {
-          if (this.bullet(g, m.x + rand(-45, 45), m.y + rand(-45, 45), { dmg: 12, force: 520, blood: 5 }, now)) hits++;
+          if (this.bullet(g, m.x + rand(-45, 45), m.y + rand(-45, 45), { dmg: 12 * this.m('dmg'), force: 520 * this.m('power'), blood: 5 }, now)) hits++;
         }
         this.sfx.shotgun();
         this.sfx.pump();
         this.shake = Math.max(this.shake, 8);
       } else if (kind === 'mitraillette') {
-        if (this.bullet(g, m.x + rand(-14, 14), m.y + rand(-14, 14), { dmg: 9, force: 420, blood: 4 }, now)) hits++;
+        if (this.bullet(g, m.x + rand(-14, 14), m.y + rand(-14, 14), { dmg: 9 * this.m('dmg'), force: 420 * this.m('power'), blood: 4 }, now)) hits++;
         this.sfx.smg();
         this.shake = Math.max(this.shake, 2);
       } else {
-        if (this.bullet(g, m.x, m.y, { dmg: 30, force: 1000, blood: 10 }, now)) hits++;
+        if (this.bullet(g, m.x, m.y, { dmg: 30 * this.m('dmg'), force: 1000 * this.m('power'), blood: 10 }, now)) hits++;
         this.sfx.pistol();
         this.shake = Math.max(this.shake, 4);
       }
@@ -2124,6 +2756,7 @@
       b.impulse(tx, ty, ux * o.force, uy * o.force - o.force * 0.15, 60 * bs);
       b.knock(now, 700);
       this.wound(hit.name, tx, ty, ux, uy, o.blood);
+      if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
       this.damage(b.partOf(hit.name), o.dmg * (hit.name === 'head' ? 1.7 : 1), now);
       return true;
     }
@@ -2152,32 +2785,142 @@
       if (!this.every('flameDmg', 100, now)) return;
       // La flamme porte à environ 320 px : on cherche le premier point touché le long du jet.
       const dist = Math.hypot(m.x - g.nx, m.y - g.ny) || 1;
-      const reach = Math.min(dist, 320);
+      const reach = Math.min(dist, 320 * this.m('power'));
       for (let t = 0.2; t <= 1.001; t += 0.2) {
         const px = g.nx + ((m.x - g.nx) / dist) * reach * t, py = g.ny + ((m.y - g.ny) / dist) * reach * t;
         const hit = b.hitTest(px, py, 18 * b.s);
         if (!hit) continue;
         this.burnUntil = now + 2600;
-        this.damage(b.partOf(hit.name), 4, now);
+        this.damage(b.partOf(hit.name), 4 * this.m('dmg'), now);
         if (this.every('flameSoot', 350, now)) this.addDecal(hit.name, px, py, 'soot', rand(8, 14) * b.s);
         if (this.every('flameHit', 500, now)) this.registerHit('flamme', now);
         break;
       }
     }
 
+    // Katana : un geste rapide à travers le corps tranche tout ce qu'il croise.
+    katana(now) {
+      const m = this.mouse, b = this.body;
+      const prev = this.blade || { x: m.x, y: m.y };
+      this.blade = { x: m.x, y: m.y };
+      const dx = m.x - prev.x, dy = m.y - prev.y, len = Math.hypot(dx, dy);
+      if (len < 4) return;
+      this.bladeAng = Math.atan2(dy, dx);
+      this.spawn({ type: 'slash', x: prev.x, y: prev.y, x2: m.x, y2: m.y, life: 0.18, max: 0.18 });
+      if (len < 12) return;
+      const ux = dx / len, uy = dy / len;
+      const parts = new Map();
+      const steps = Math.ceil(len / 8);
+      for (let i = 0; i <= steps; i++) {
+        const x = prev.x + (dx * i) / steps, y = prev.y + (dy * i) / steps;
+        const hit = b.hitTest(x, y, 2 * b.s);
+        if (hit && !parts.has(b.partOf(hit.name))) parts.set(b.partOf(hit.name), { ...hit, x, y });
+      }
+      if (this.every('katSnd', 110, now)) this.sfx.slash();
+      let any = false;
+      for (const [part, hit] of parts) {
+        if (!this.every(`kat-${part}`, 200 * this.m('rate'), now)) continue;
+        any = true;
+        const f = 500 * this.m('power');
+        b.impulse(hit.x, hit.y, ux * f, uy * f - 150, 50 * b.s);
+        this.wound(hit.name, hit.x, hit.y, ux, uy, 9, 'blood');
+        if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
+        this.damage(part, 34 * this.m('dmg'), now);
+      }
+      if (any) {
+        b.knock(now, 600);
+        this.text(m.x, m.y - 30, D.pick(['TCHAK!', 'SLASH!', 'ZING!']), '#e5e7eb', 40);
+        this.registerHit('katana', now);
+      }
+    }
+
+    // Tronçonneuse : dégâts continus là où la lame touche.
+    chainsaw(now) {
+      const m = this.mouse, b = this.body;
+      const hit = b.hitTest(m.x, m.y, 6 * b.s);
+      if (!hit || !this.every('saw', 90 * this.m('rate'), now)) return;
+      const f = this.m('power');
+      b.impulse(m.x, m.y, rand(-200, 200) * f, rand(-250, 50) * f, 45 * b.s);
+      if (this.settings.gore) {
+        this.bleed(m.x, m.y, rand(-1, 1), -1, 6, 520);
+        if (Math.random() < 0.25) this.addDecal(hit.name, m.x, m.y, 'blood', rand(6, 10) * b.s);
+      } else {
+        this.burstStars(m.x, m.y, 1);
+      }
+      this.damage(b.partOf(hit.name), 7 * this.m('dmg'), now);
+      this.shake = Math.max(this.shake, 3);
+      b.knock(now, 400);
+      if (this.every('sawHit', 450, now)) this.registerHit('tronconneuse', now);
+    }
+
+    // Laser : rayon continu qui s'arrête sur le premier point touché.
+    laser(now) {
+      const g = this.gun(), m = this.mouse, b = this.body;
+      const dx = m.x - g.nx, dy = m.y - g.ny, dist = Math.hypot(dx, dy) || 1;
+      let end = { x: m.x, y: m.y }, hit = null;
+      const steps = Math.ceil(dist / 10);
+      for (let i = 1; i <= steps; i++) {
+        const x = g.nx + (dx * i) / steps, y = g.ny + (dy * i) / steps;
+        const h = b.hitTest(x, y, 2 * b.s);
+        if (h) { hit = h; end = { x, y }; break; }
+      }
+      this.beam = { x1: g.nx, y1: g.ny, x2: end.x, y2: end.y, until: now + 80, width: this.m('power') };
+      if (Math.random() < 0.6) this.spawn({ type: 'spark', x: end.x, y: end.y, vx: rand(-250, 250), vy: rand(-300, -50), life: 0.3, max: 0.3 });
+      if (!hit || !this.every('laser', 100 * this.m('rate'), now)) return;
+      const f = 120 * this.m('power');
+      b.impulse(end.x, end.y, (dx / dist) * f, (dy / dist) * f, 40 * b.s);
+      if (this.every('laserSoot', 300, now)) this.addDecal(hit.name, end.x, end.y, 'soot', rand(5, 8) * b.s);
+      if (this.settings.gore && Math.random() < 0.4) this.bleed(end.x, end.y, -dx / dist, -dy / dist, 2, 250);
+      this.damage(b.partOf(hit.name), 5 * this.m('dmg'), now);
+      if (hit.name === 'head' && this.every('laserHead', 1000, now)) this.questEvent('head');
+      if (this.every('laserHit', 450, now)) this.registerHit('laser', now);
+    }
+
+    launchGrenade(x, y) {
+      const g = this.gun();
+      const dist = Math.hypot(x - g.nx, y - g.ny);
+      this.objects.push({
+        kind: 'obus', sx: g.nx, sy: g.ny, tx: x, ty: y, t: 0,
+        dur: clamp(dist / 1100, 0.18, 0.6), arc: clamp(dist * 0.18, 20, 120), x: g.nx, y: g.ny, rot: 0,
+      });
+      this.recoil = RECOIL.lancegrenades;
+      this.muzzle = 1;
+      this.sfx.launcher();
+      for (let i = 0; i < 4; i++) {
+        this.spawn({ type: 'smoke', x: g.nx, y: g.ny, vx: rand(-60, 60), vy: rand(-80, 0), r: rand(6, 10), grow: 30, life: 0.6, max: 0.6 });
+      }
+      if (this.nearBody(x, y, 300)) this.say(D.pick(D.PHRASES.lancegrenades));
+    }
+
+    // Frappe aérienne : un avion passe et lâche 5 bombes autour du point visé.
+    airStrike(x, now) {
+      const n = 5;
+      this.objects.push({ kind: 'marker', x, y: this.H - 8, until: now + 1500 });
+      this.objects.push({ kind: 'jet', x: -160, y: 70, vx: (this.W + 320) / 1.4, until: now + 1400 });
+      for (let i = 0; i < n; i++) {
+        this.objects.push({
+          kind: 'bombe', x: x + (i - (n - 1) / 2) * rand(40, 60) * this.m('power'), y: -50,
+          vx: rand(-20, 20), vy: 500, start: now + 700 + i * 110, whistled: false,
+        });
+      }
+      this.sfx.jet();
+      this.toast('✈️ Frappe aérienne en approche !');
+      this.say(D.pick(D.PHRASES.frappe), true);
+    }
+
     // ---------- Explosifs ----------
 
     throwGrenade(x, y, now) {
-      if (!this.every('throw', 250, now) || this.objects.length >= 6) return;
+      if (!this.every('throw', 250 * this.m('rate'), now) || this.objects.length >= 6) return;
       const sx = clamp(x + rand(-200, 200), 30, this.W - 30);
-      this.objects.push({ kind: 'grenade', fly: true, sx, sy: this.H + 30, tx: x, ty: y, t: 0, dur: 0.5, arc: rand(150, 230), x: sx, y: this.H + 30, vx: 0, vy: 0, rot: 0, born: now, fuse: 2000, tick: 0 });
+      this.objects.push({ kind: 'grenade', fly: true, sx, sy: this.H + 30, tx: x, ty: y, t: 0, dur: 0.5, arc: rand(150, 230), x: sx, y: this.H + 30, vx: 0, vy: 0, rot: 0, born: now, fuse: 2000 * this.m('rate'), tick: 0 });
       this.sfx.clink();
       if (this.nearBody(x, y, 420)) this.say(D.pick(D.PHRASES.grenade));
     }
 
     placeDynamite(x, y, now) {
       if (this.objects.filter((o) => o.kind === 'dynamite').length >= 3) return;
-      this.objects.push({ kind: 'dynamite', fly: false, x, y, vx: 0, vy: 0, rot: 0, born: now, fuse: 2400, tick: 0 });
+      this.objects.push({ kind: 'dynamite', fly: false, x, y, vx: 0, vy: 0, rot: 0, born: now, fuse: 2400 * this.m('rate'), tick: 0 });
       this.sfx.tick();
       if (this.nearBody(x, y, 450)) this.say(D.pick(D.PHRASES.dynamite), true);
     }
@@ -2188,7 +2931,9 @@
     }
 
     explode(x, y, kind, now) {
-      const cfg = BLAST[kind], b = this.body, bs = b.s;
+      const base = BLAST[kind], b = this.body, bs = b.s;
+      const power = this.m('power', kind);
+      const cfg = { ...base, power: base.power * power, radius: base.radius * power, dmg: base.dmg * this.m('dmg', kind) };
       b.radial(x, y, cfg.power, cfg.radius);
       const reps = { lArm: b.p.lElbow, rArm: b.p.rElbow, lLeg: b.p.lKnee, rLeg: b.p.rKnee, head: b.p.head, torso: b.center() };
       let touched = false;
@@ -2217,7 +2962,8 @@
             }
           }
         }
-        this.registerHit(kind === 'roquette' ? 'roquette' : 'explosion', now);
+        this.questEvent('explo');
+        this.registerHit(kind, now, 'explosion');
       }
       for (let i = 0; i < 14; i++) {
         const life = rand(0.45, 0.75);
@@ -2249,6 +2995,35 @@
           if (o.trav >= o.dist || b.hitTest(o.x, o.y, 4 * b.s) || out) {
             this.objects.splice(i, 1);
             this.explode(clamp(o.x, 0, this.W), clamp(o.y, 0, this.H - 4), 'roquette', now);
+          }
+          continue;
+        }
+        if (o.kind === 'obus') {
+          o.t += DT / o.dur;
+          const t = Math.min(1, o.t);
+          o.x = o.sx + (o.tx - o.sx) * t;
+          o.y = o.sy + (o.ty - o.sy) * t - o.arc * Math.sin(Math.PI * t);
+          o.rot += 0.4;
+          if (o.t >= 1 || b.hitTest(o.x, o.y, 4 * b.s)) {
+            this.objects.splice(i, 1);
+            this.explode(o.x, clamp(o.y, 0, this.H - 4), 'lancegrenades', now);
+          }
+          continue;
+        }
+        if (o.kind === 'marker' || o.kind === 'jet') {
+          if (o.kind === 'jet') o.x += o.vx * DT;
+          if (now > o.until) this.objects.splice(i, 1);
+          continue;
+        }
+        if (o.kind === 'bombe') {
+          if (now < o.start) continue;
+          if (!o.whistled) { o.whistled = true; this.sfx.whistle(); }
+          o.vy += 2600 * DT;
+          o.x += o.vx * DT;
+          o.y += o.vy * DT;
+          if (o.y >= this.H - 14 || b.hitTest(o.x, o.y, 6 * b.s)) {
+            this.objects.splice(i, 1);
+            this.explode(o.x, Math.min(o.y, this.H - 10), 'frappe', now);
           }
           continue;
         }
@@ -2320,6 +3095,8 @@
       b.knock(now, 1500);
       this.shake = Math.max(this.shake, 8);
       if (part !== 'head') this.say(D.pick(D.PHRASES.detach), true);
+      this.gainXp(25, now);
+      this.questEvent('sever');
     }
 
     knockOut(now) {
@@ -2335,12 +3112,14 @@
       this.text(c.x, c.y - 120, 'K.O. !', '#ef4444', 76);
       this.sfx.ko();
       if (!this.body.off.head) this.say(D.pick(D.PHRASES.ko), true);
+      this.gainXp(60, now);
+      this.questEvent('ko');
     }
 
-    wound(name, x, y, ux, uy, n) {
+    wound(name, x, y, ux, uy, n, decal = 'hole') {
       const bs = this.body.s;
       if (this.settings.gore) {
-        this.addDecal(name, x, y, 'hole', rand(3, 4.5) * bs);
+        this.addDecal(name, x, y, decal, (decal === 'hole' ? rand(3, 4.5) : rand(6, 10)) * bs);
         this.bleed(x, y, ux, uy, n);
         this.bleed(x, y, -ux * 0.4, -uy * 0.4, Math.ceil(n / 3));
       } else {
@@ -2392,6 +3171,7 @@
       this.shake = Math.max(this.shake, 4 + power * 12);
       b.knock(now, 900);
       this.damage('torso', 6 * power, now);
+      this.questEvent('wall');
       this.registerHit('wall', now);
     }
 
@@ -2434,7 +3214,7 @@
       this.bubble = { text: t, until: now + 1800 + t.length * 35 };
     }
 
-    registerHit(kind, now) {
+    registerHit(kind, now, talk = kind) {
       this.lastActivity = now;
       this.session++;
       this.pending++;
@@ -2444,6 +3224,9 @@
       this.lastHit = now;
       // Évite de compter deux fois un coup qui projette le personnage contre le sol ou un mur.
       if (kind !== 'wall') this.quietUntil = Math.max(this.quietUntil, now + 450);
+      this.gainXp((XP_PER_HIT[kind] ?? 4) * (1 + Math.min(this.combo, 20) * 0.05), now);
+      this.questEvent('hits', 1, kind);
+      this.questEvent('combo', this.combo);
       if (this.ko) return;
       const b = this.body;
       if (this.combo >= 15 && !(this.mood === 'dizzy' && now < this.moodUntil)) {
@@ -2456,7 +3239,7 @@
         this.text(b.p.head.x, b.p.head.y - 90 * b.s, `COMBO ×${this.combo}`, '#facc15', 34);
       }
       if (!b.off.head && Math.random() < 0.6 && this.every('ouch', 600, now)) this.sfx.ouch();
-      if (this.combo === 1 || Math.random() < 0.3) this.say(this.phrase(kind));
+      if (this.combo === 1 || Math.random() < 0.3) this.say(this.phrase(talk));
     }
 
     scheduleSave() {
@@ -2520,7 +3303,7 @@
           case 'fire': p.r += p.grow * DT; p.vy -= 300 * DT; p.vx *= 0.96; break;
           case 'smoke': p.r += p.grow * DT; p.vx *= 0.97; p.vy *= 0.97; break;
           case 'splat': p.drip += DT * 14; continue;
-          case 'hole': case 'tracer': continue;
+          case 'hole': case 'tracer': case 'slash': continue;
         }
         p.x += (p.vx || 0) * DT;
         p.y += (p.vy || 0) * DT;
@@ -2553,8 +3336,11 @@
       const b = this.body, m = this.mouse;
       if (b.pin && m.x > -500) { b.pin.x = m.x; b.pin.y = m.y; }
       if (m.down) {
-        if (this.settings.weapon === 'mitraillette' && this.every('smg', 85, now)) this.shoot('mitraillette', now);
+        if (this.settings.weapon === 'mitraillette' && this.every('smg', 85 * this.m('rate'), now)) this.shoot('mitraillette', now);
         if (this.settings.weapon === 'flamme') this.flamethrower(now);
+        if (this.settings.weapon === 'katana') this.katana(now);
+        if (this.settings.weapon === 'tronconneuse') this.chainsaw(now);
+        if (this.settings.weapon === 'laser') this.laser(now);
       }
       b.step(now);
       if (this.entering && b.grounded) {
@@ -2596,6 +3382,7 @@
         this.nextBlink = now + rand(2200, 5200);
       }
       if (now - this.lastActivity > 30000 && this.every('idle', 30000, now)) this.say(D.pick(D.PHRASES.idle));
+      if (this.every('questTick', 1000, now)) this.tickQuests();
     }
 
     // ---------- Rendu ----------
@@ -2625,6 +3412,7 @@
         ctx.fillStyle = `rgba(255,247,237,${this.flash * 0.55})`;
         ctx.fillRect(0, 0, W, H);
       }
+      if (this.beam && now < this.beam.until) this.drawBeam(ctx, this.beam);
       if (FIREARMS.has(this.settings.weapon)) this.drawGun(ctx);
       this.drawCursor(ctx);
     }
@@ -2675,6 +3463,36 @@
         ctx.beginPath(); ctx.roundRect(-16, -5, 26, 10, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#dc2626';
         ctx.beginPath(); ctx.moveTo(10, -5); ctx.lineTo(21, 0); ctx.lineTo(10, 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (o.kind === 'obus') {
+        ctx.rotate(o.rot);
+        ctx.scale(0.5, 0.5);
+        D.drawWeapon(ctx, 'grenade');
+      } else if (o.kind === 'bombe') {
+        if (now >= o.start) {
+          ctx.rotate(Math.atan2(o.vy, o.vx) - Math.PI / 2);
+          ctx.scale(0.9, 0.9);
+          D.drawWeapon(ctx, 'frappe');
+        }
+      } else if (o.kind === 'marker') {
+        if (Math.floor(now / 150) % 2) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-14, -8); ctx.lineTo(14, 8);
+          ctx.moveTo(14, -8); ctx.lineTo(-14, 8);
+          ctx.stroke();
+        }
+      } else if (o.kind === 'jet') {
+        // Silhouette d'avion de chasse qui traverse le haut de l'écran.
+        ctx.fillStyle = 'rgba(39,39,42,.85)';
+        ctx.beginPath();
+        ctx.moveTo(60, 0); ctx.lineTo(-40, -8); ctx.lineTo(-60, -22); ctx.lineTo(-66, -22); ctx.lineTo(-56, -6);
+        ctx.lineTo(-70, -4); ctx.lineTo(-70, 4); ctx.lineTo(-56, 6); ctx.lineTo(-66, 22); ctx.lineTo(-60, 22); ctx.lineTo(-40, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath(); ctx.moveTo(10, -3); ctx.lineTo(-20, -40); ctx.lineTo(-32, -40); ctx.lineTo(-16, -4); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(10, 3); ctx.lineTo(-20, 40); ctx.lineTo(-32, 40); ctx.lineTo(-16, 4); ctx.closePath(); ctx.fill();
       } else {
         const left = 1 - (now - o.born) / o.fuse;
         const pulse = left < 0.3 ? 1 + Math.sin(now / 40) * 0.1 : 1;
@@ -2746,6 +3564,12 @@
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.roundRect(-4, -1.6, 8, 3.2, 1); ctx.fill(); ctx.stroke();
             ctx.restore();
+            break;
+          case 'slash':
+            ctx.strokeStyle = `rgba(255,255,255,${0.85 * a})`;
+            ctx.lineWidth = 6 * a + 1;
+            ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x2, p.y2); ctx.stroke();
             break;
           case 'tracer':
             ctx.strokeStyle = `rgba(254,240,138,${a})`;
@@ -2891,11 +3715,38 @@
       ctx.restore();
     }
 
+    drawBeam(ctx, beam) {
+      const w = beam.width;
+      ctx.save();
+      ctx.lineCap = 'round';
+      for (const [color, width] of [['rgba(239,68,68,.3)', 14], ['#ef4444', 6], ['#fff', 2]]) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width * w * (0.85 + Math.random() * 0.3);
+        ctx.beginPath(); ctx.moveTo(beam.x1, beam.y1); ctx.lineTo(beam.x2, beam.y2); ctx.stroke();
+      }
+      this.disc(ctx, beam.x2, beam.y2, 7 * w, 'rgba(254,240,138,.9)');
+      ctx.restore();
+    }
+
     drawCursor(ctx) {
       const m = this.mouse, w = this.settings.weapon;
       if (m.x < -500 || w === 'main') return;
-      if (FIREARMS.has(w)) {
+      if (FIREARMS.has(w) || w === 'frappe') {
         this.drawCrosshair(ctx, m.x, m.y);
+        return;
+      }
+      if (w === 'katana' || w === 'tronconneuse') {
+        // Le bout de la lame est sur le curseur.
+        const box = D.WEAPON_BOX[w];
+        const ang = w === 'katana' ? this.bladeAng : -0.5;
+        const jitter = w === 'tronconneuse' && m.down ? rand(-2, 2) : 0;
+        ctx.save();
+        ctx.translate(m.x + jitter, m.y + jitter);
+        ctx.rotate(ang);
+        ctx.scale(0.8, 0.8);
+        ctx.translate(-box.muzzle, 0);
+        D.drawWeapon(ctx, w);
+        ctx.restore();
         return;
       }
       ctx.save();
@@ -2972,6 +3823,8 @@
   }
 
   const chips = {};
+  const labels = {};
+  let progress = structuredClone(D.PROGRESS_DEFAULT);
   for (const w of D.WEAPONS) {
     const chip = document.createElement('button');
     chip.type = 'button';
@@ -2982,8 +3835,15 @@
     const label = document.createElement('span');
     label.textContent = w.short;
     chip.append(label);
-    chip.addEventListener('click', () => play(w.id));
+    chip.addEventListener('click', () => {
+      if (!D.isUnlocked(progress, w.id)) {
+        globalThis.webAlert(`🔒 ${w.short} se débloque au niveau ${D.UNLOCKS[w.id]}. Joue pour gagner de l'XP !`);
+        return;
+      }
+      play(w.id);
+    });
     chips[w.id] = chip;
+    labels[w.id] = label;
     $('arsenal').append(chip);
   }
 
@@ -2993,7 +3853,15 @@
 
   async function refresh() {
     const settings = await D.loadSettings();
-    markWeapon(settings.weapon);
+    progress = await D.loadProgress();
+    for (const w of D.WEAPONS) {
+      const locked = !D.isUnlocked(progress, w.id);
+      chips[w.id].classList.toggle('locked', locked);
+      chips[w.id].title = locked ? `${w.label} · débloqué au niveau ${D.UNLOCKS[w.id]}` : w.label;
+      labels[w.id].textContent = locked ? `🔒 Niv. ${D.UNLOCKS[w.id]}` : w.short;
+    }
+    $('level').textContent = D.levelInfo(progress.xp).level;
+    markWeapon(D.isUnlocked(progress, settings.weapon) ? settings.weapon : D.DEFAULTS.weapon);
     const { stats = {} } = await chrome.storage.local.get('stats');
     $('totalBig').textContent = (stats.total || 0).toLocaleString('fr-FR');
     $('koBig').textContent = (stats.ko || 0).toLocaleString('fr-FR');
