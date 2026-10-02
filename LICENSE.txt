@@ -1,0 +1,43 @@
+DÉFOULOIR — CONTRAT DE LICENCE D'UTILISATEUR FINAL
+
+Copyright © 2026 xNoJoker. Tous droits réservés.
+
+1. Propriété
+L'extension « Tout dans le Buffet », y compris son code source, ses graphismes, ses
+animations, ses sons, ses textes, son nom et son logo (ensemble, le « Logiciel »),
+est une œuvre originale de xNoJoker (l'« Auteur »), protégée par le Code de la
+propriété intellectuelle (notamment les articles L.111-1 et L.112-2) et par les
+conventions internationales sur le droit d'auteur. Le Logiciel est concédé sous
+licence, il n'est pas vendu.
+
+2. Droits accordés
+L'Auteur accorde à l'utilisateur une licence personnelle, gratuite, non exclusive
+et non transférable lui permettant d'installer et d'utiliser le Logiciel dans son
+navigateur, tel qu'il est distribué par l'Auteur via le Chrome Web Store.
+
+3. Restrictions
+Sauf autorisation écrite et préalable de l'Auteur, et sous réserve des exceptions
+prévues par l'article L.122-6-1 du Code de la propriété intellectuelle, il est
+interdit de :
+  - copier, reproduire ou redistribuer tout ou partie du Logiciel ;
+  - modifier, adapter, traduire le Logiciel ou créer des œuvres dérivées ;
+  - publier le Logiciel ou une version modifiée sous un autre nom, sur le Chrome
+    Web Store ou ailleurs ;
+  - vendre, louer, sous-licencier ou exploiter commercialement le Logiciel ;
+  - retirer ou modifier les mentions de droit d'auteur.
+
+4. Contenu de l'utilisateur
+Les images (photos de visage) et les textes ajoutés par l'utilisateur restent sa
+propriété et sont stockés uniquement sur son appareil. L'utilisateur garantit
+disposer des droits nécessaires sur ces contenus et s'engage à ne pas utiliser le
+Logiciel pour harceler, dénigrer ou porter atteinte à l'image d'autrui.
+
+5. Absence de garantie
+Le Logiciel est fourni « en l'état », sans garantie d'aucune sorte. Dans les
+limites autorisées par la loi, l'Auteur ne pourra être tenu responsable d'aucun
+dommage résultant de son utilisation.
+
+6. Droit applicable
+La présente licence est régie par le droit français.
+
+Contact : dm.tecyber@gmail.com
