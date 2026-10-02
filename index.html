@@ -498,6 +498,7 @@ globalThis.BUFFET_FIREBASE = {
     volume: 0.6,
     customPhrases: [],
     weapon: 'pistolet',
+    decor: 'auto',
   });
 
   // Rangées dans l'ordre où on les débloque (voir D.UNLOCKS dans progress.js).
@@ -506,15 +507,25 @@ globalThis.BUFFET_FIREBASE = {
     { id: 'pistolet', short: 'Pistolet', label: 'Pistolet' },
     { id: 'mitraillette', short: 'Mitraillette', label: 'Mitraillette (maintenir le clic)' },
     { id: 'pompe', short: 'Pompe', label: 'Fusil à pompe' },
+    { id: 'batte', short: 'Batte', label: 'Batte cloutée (frapper d\'un geste)' },
     { id: 'grenade', short: 'Grenade', label: 'Grenade' },
     { id: 'katana', short: 'Katana', label: 'Katana (trancher d\'un geste)' },
+    { id: 'revolver', short: 'Revolver', label: 'Revolver Magnum' },
     { id: 'flamme', short: 'Flammes', label: 'Lance-flammes (maintenir le clic)' },
     { id: 'dynamite', short: 'Dynamite', label: 'Dynamite' },
+    { id: 'masse', short: 'Masse', label: 'Masse de chantier' },
     { id: 'tronconneuse', short: 'Tronço', label: 'Tronçonneuse (maintenir le clic)' },
+    { id: 'arbalete', short: 'Arbalète', label: 'Arbalète' },
     { id: 'roquette', short: 'Bazooka', label: 'Lance-roquettes' },
+    { id: 'molotov', short: 'Molotov', label: 'Cocktail Molotov' },
     { id: 'lancegrenades', short: 'Lance-gren.', label: 'Lance-grenades' },
+    { id: 'sniper', short: 'Sniper', label: 'Fusil de précision' },
+    { id: 'mine', short: 'Mine', label: 'Mine (explose au contact)' },
     { id: 'laser', short: 'Laser', label: 'Laser (maintenir le clic)' },
+    { id: 'minigun', short: 'Minigun', label: 'Minigun (maintenir le clic)' },
+    { id: 'plasma', short: 'Plasma', label: 'Fusil à plasma' },
     { id: 'frappe', short: 'Frappe', label: 'Frappe aérienne' },
+    { id: 'missile', short: 'Missile', label: 'Missile à tête chercheuse' },
   ];
 
   D.HAIR_STYLES = [
@@ -548,6 +559,16 @@ globalThis.BUFFET_FIREBASE = {
     laser: ['Ça chauffe !', 'Je vois rouge !', "C'est de la science-fiction, ça !"],
     frappe: ['Euh… un avion ?', 'Qui a appelé l\'aviation ?!', 'Pas les bombes !'],
     levelup: ['Tu progresses, hein ?', 'Oh non, il a de nouveaux jouets…'],
+    batte: ['HOME RUN !', "Ça, c'est du sport !", 'Mes côtes !'],
+    revolver: ['Gros calibre, gros bobo.', 'Six coups, six bleus.'],
+    masse: ['CRAC ! Mes os…', 'Je suis pas un mur porteur !'],
+    arbalete: ['Robin des Bois, sérieux ?', "Il y a une flèche dans mon…"],
+    molotov: ['Ça sent le cramé !', 'Au feu ! AU FEU !'],
+    sniper: ["Je l'ai pas vu venir…", 'Il tire depuis où, lui ?!'],
+    mine: ['Ne bouge plus… ne bouge plus…', 'Je marche sur quoi, là ?'],
+    minigun: ['BRRRRRRT !', "C'est une moissonneuse, ce truc ?!"],
+    plasma: ['Ça vient du futur, ça ?', 'Je fonds !'],
+    missile: ['Il me suit !', 'Il fait demi-tour ?!'],
     wall: ['Le mur ! LE MUR !', 'Qui a mis ce mur là ?', "Aïe, le bord de l'écran !"],
     detach: ["C'est rien, juste une égratignure !", 'Mon bras !', 'Quelqu\'un a vu ma jambe ?', "J'en avais besoin, de ça !"],
     ko: ['Game over…', 'Dites à ma mère que je l\'aimais…', 'Je reviendrai…'],
@@ -613,14 +634,27 @@ globalThis.BUFFET_FIREBASE = {
 
   // Niveau requis pour chaque arme.
   D.UNLOCKS = {
-    main: 1, pistolet: 1, mitraillette: 2, pompe: 3, grenade: 4, katana: 5, flamme: 6,
-    dynamite: 7, tronconneuse: 8, roquette: 9, lancegrenades: 11, laser: 13, frappe: 15,
+    main: 1, pistolet: 1, mitraillette: 2, pompe: 3, batte: 4, grenade: 5, katana: 6, revolver: 7,
+    flamme: 8, dynamite: 9, masse: 10, tronconneuse: 11, arbalete: 12, roquette: 13, molotov: 14,
+    lancegrenades: 15, sniper: 16, mine: 17, laser: 18, minigun: 19, plasma: 20,
+    frappe: 22, missile: 24,
   };
-  D.MAX_LEVEL = 30;
+  D.MAX_LEVEL = 40;
+
+  // Décors à débloquer. « page » laisse voir le site web derrière (extension uniquement).
+  D.DECORS = [
+    { id: 'page', label: 'Page web', level: 1, extensionOnly: true },
+    { id: 'bureau', label: 'Open space', level: 1 },
+    { id: 'ecole', label: 'Salle de classe', level: 6 },
+    { id: 'parc', label: "Parc d'attractions", level: 12 },
+    { id: 'apocalypse', label: 'Ville en ruines', level: 18 },
+    { id: 'lune', label: 'Base lunaire', level: 24 },
+  ];
+  D.isDecorUnlocked = (progress, id) => D.levelInfo(progress.xp).level >= (D.DECORS.find((d) => d.id === id)?.level || 1);
   D.CHALLENGE_PERIOD = 5 * 60 * 1000;
 
-  // Progression rapide : environ 1 min pour le niveau 2, tout débloqué en moins d'une heure.
-  D.xpForNext = (level) => 300 + 120 * (level - 1);
+  // Progression un peu plus longue : environ 1 min 30 pour le niveau 2, chaque niveau un peu plus long.
+  D.xpForNext = (level) => 380 + 160 * (level - 1);
 
   D.levelInfo = (xp) => {
     let level = 1;
@@ -652,7 +686,7 @@ globalThis.BUFFET_FIREBASE = {
     return stat === 'rate' ? 1 - def.per * rank : 1 + def.per * rank;
   };
 
-  D.pointsLeft = (progress) => D.levelInfo(progress.xp).level - 1 - (progress.spent || 0);
+  D.pointsLeft = (progress) => Math.max(0, D.levelInfo(progress.xp).level - 1 - (progress.spent || 0));
 
   // Les défis en cours sont figés au début de chaque période, pour qu'un passage de niveau ne les change pas.
   D.PROGRESS_DEFAULT = Object.freeze({ xp: 0, spent: 0, upgrades: {}, quests: { period: 0, list: [], counts: [], done: [] } });
@@ -1450,6 +1484,20 @@ globalThis.BUFFET_FIREBASE = {
         case 'soot':
           blob(ctx, x, y, d.r, d.seed, '#111827', 0.55, a);
           break;
+        case 'bolt': {
+          // Carreau d'arbalète planté : la tige ressort à l'opposé du sens du tir.
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(a + (d.rot || 0));
+          ctx.strokeStyle = '#a16207';
+          ctx.lineWidth = Math.max(2, d.r * 0.12);
+          ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(-d.r, 0); ctx.lineTo(d.r * 0.1, 0); ctx.stroke();
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath(); ctx.moveTo(-d.r, 0); ctx.lineTo(-d.r - 6, -5); ctx.lineTo(-d.r + 6, 0); ctx.lineTo(-d.r - 6, 5); ctx.closePath(); ctx.fill();
+          ctx.restore();
+          break;
+        }
         default:
           blob(ctx, x, y, d.r, d.seed, '#111827', 0.4, a);
       }
@@ -1518,6 +1566,16 @@ globalThis.BUFFET_FIREBASE = {
     lancegrenades: { x: -62, y: -22, w: 132, h: 56, muzzle: 68 },
     laser: { x: -48, y: -22, w: 124, h: 52, muzzle: 70 },
     frappe: { x: -16, y: -32, w: 32, h: 62 },
+    revolver: { x: -32, y: -20, w: 90, h: 58, muzzle: 54 },
+    sniper: { x: -82, y: -26, w: 204, h: 52, muzzle: 118 },
+    arbalete: { x: -58, y: -42, w: 124, h: 84, muzzle: 60 },
+    minigun: { x: -58, y: -28, w: 154, h: 58, muzzle: 92 },
+    plasma: { x: -52, y: -24, w: 134, h: 54, muzzle: 74 },
+    masse: { x: -72, y: -22, w: 114, h: 44, muzzle: 27 },
+    batte: { x: -64, y: -14, w: 156, h: 28, muzzle: 88 },
+    molotov: { x: -14, y: -40, w: 28, h: 72 },
+    mine: { x: -22, y: -14, w: 44, h: 26 },
+    missile: { x: -72, y: -26, w: 160, h: 58, muzzle: 86 },
   };
 
   function shape(ctx, color, draw) {
@@ -1677,6 +1735,110 @@ globalThis.BUFFET_FIREBASE = {
       shape(ctx, '#3f3f46', () => ctx.ellipse(0, 4, 10, 22, 0, 0, Math.PI * 2));
       rect(ctx, '#facc15', -10, -4, 20, 5, 1);
     },
+    revolver(ctx) {
+      poly(ctx, '#7c2d12', [-26, 2, -12, 2, -6, 34, -24, 36]);
+      rect(ctx, '#3f3f46', -26, -10, 22, 14, 3);
+      rect(ctx, '#3f3f46', -32, -18, 9, 7, 2);
+      rect(ctx, '#71717a', 12, -12, 42, 9, 2);
+      rect(ctx, '#52525b', -8, -15, 24, 20, 7);
+      ctx.beginPath(); ctx.moveTo(-2, -12); ctx.lineTo(-2, 2); ctx.moveTo(6, -12); ctx.lineTo(6, 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-2, 10, 6, 0, Math.PI); ctx.stroke();
+    },
+    sniper(ctx) {
+      poly(ctx, '#3f3f46', [-82, -6, -30, -10, -30, 8, -82, 16]);
+      poly(ctx, '#27272a', [-26, 6, -14, 6, -10, 26, -24, 26]);
+      rect(ctx, '#18181b', 28, -7, 90, 6, 2);
+      rect(ctx, '#27272a', -30, -10, 62, 16, 3);
+      rect(ctx, '#18181b', -16, -24, 54, 11, 5);
+      shape(ctx, '#38bdf8', () => ctx.ellipse(38, -18.5, 3, 5, 0, 0, Math.PI * 2));
+      ctx.beginPath(); ctx.moveTo(84, -1); ctx.lineTo(76, 24); ctx.moveTo(88, -1); ctx.lineTo(96, 24); ctx.stroke();
+    },
+    arbalete(ctx) {
+      rect(ctx, '#92400e', -58, -6, 92, 12, 3);
+      poly(ctx, '#27272a', [-24, 4, -12, 4, -8, 26, -22, 26]);
+      ctx.save();
+      ctx.lineWidth *= 2;
+      ctx.strokeStyle = '#3f3f46';
+      ctx.beginPath(); ctx.moveTo(26, -40); ctx.quadraticCurveTo(52, 0, 26, 40); ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth *= 0.6;
+      ctx.beginPath(); ctx.moveTo(26, -40); ctx.lineTo(-6, 0); ctx.lineTo(26, 40); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#a16207', -6, -2, 58, 4, 1);
+      poly(ctx, '#9ca3af', [52, -5, 64, 0, 52, 5]);
+    },
+    minigun(ctx) {
+      rect(ctx, '#3f3f46', -58, -18, 52, 34, 8);
+      for (const y of [-15, -5, 5]) rect(ctx, '#27272a', -6, y, 98, 7, 2);
+      rect(ctx, '#52525b', 28, -18, 8, 32, 2);
+      rect(ctx, '#52525b', 78, -18, 8, 32, 2);
+      ctx.save();
+      ctx.lineWidth *= 2;
+      ctx.beginPath(); ctx.moveTo(-50, -18); ctx.quadraticCurveTo(-32, -34, -12, -18); ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = '#d4a017';
+      ctx.lineWidth *= 2;
+      ctx.beginPath(); ctx.moveTo(-40, 16); ctx.quadraticCurveTo(-34, 28, -18, 28); ctx.stroke();
+      ctx.restore();
+    },
+    plasma(ctx) {
+      poly(ctx, '#0f172a', [-26, 6, -12, 6, -8, 30, -24, 30]);
+      poly(ctx, '#334155', [-6, -12, 6, -24, 14, -24, 10, -12]);
+      rect(ctx, '#1e293b', -52, -12, 90, 22, 10);
+      rect(ctx, '#a3e635', -32, -6, 48, 10, 5);
+      shape(ctx, '#334155', () => ctx.ellipse(58, -1, 16, 12, 0, 0, Math.PI * 2));
+      shape(ctx, '#d9f99d', () => ctx.ellipse(62, -1, 8, 7, 0, 0, Math.PI * 2));
+    },
+    masse(ctx) {
+      // Le centre de la tête de masse est à x = 27 (bout de l'arme).
+      rect(ctx, '#b45309', -72, -4, 92, 8, 3);
+      rect(ctx, '#18181b', -72, -5, 26, 10, 3);
+      rect(ctx, '#4b5563', 14, -22, 26, 44, 4);
+      rect(ctx, '#9ca3af', 14, -22, 26, 7, 2);
+      rect(ctx, '#9ca3af', 14, 15, 26, 7, 2);
+    },
+    batte(ctx) {
+      shape(ctx, '#d97706', () => {
+        ctx.moveTo(-60, -3);
+        ctx.lineTo(10, -6);
+        ctx.quadraticCurveTo(86, -11, 90, 0);
+        ctx.quadraticCurveTo(86, 11, 10, 6);
+        ctx.lineTo(-60, 3);
+        ctx.closePath();
+      });
+      shape(ctx, '#92400e', () => ctx.arc(-61, 0, 5, 0, Math.PI * 2));
+      ctx.save();
+      ctx.strokeStyle = '#d1d5db';
+      ctx.beginPath();
+      for (const [x, s] of [[40, -1], [52, 1], [64, -1], [76, 1], [58, -1]]) {
+        ctx.moveTo(x, s * 7); ctx.lineTo(x + 3, s * 13);
+      }
+      ctx.stroke();
+      ctx.restore();
+    },
+    molotov(ctx) {
+      rect(ctx, '#65a30d', -4, -32, 8, 16, 2);
+      rect(ctx, '#4d7c0f', -11, -18, 22, 48, 7);
+      rect(ctx, '#f59e0b', -8, 4, 16, 23, 4);
+      poly(ctx, '#e7e5e4', [-5, -31, -9, -40, 5, -38, 6, -31]);
+    },
+    mine(ctx) {
+      shape(ctx, '#3f3f46', () => ctx.ellipse(0, 4, 21, 8, 0, 0, Math.PI * 2));
+      shape(ctx, '#4d7c0f', () => ctx.ellipse(0, -1, 16, 7, 0, 0, Math.PI * 2));
+      shape(ctx, '#dc2626', () => ctx.arc(0, -6, 4, 0, Math.PI * 2));
+    },
+    missile(ctx) {
+      poly(ctx, '#27272a', [-10, 10, 2, 10, 6, 32, -8, 32]);
+      rect(ctx, '#334155', -64, -14, 142, 24, 6);
+      rect(ctx, '#ef4444', -40, -14, 8, 24, 1);
+      rect(ctx, '#0ea5e9', -14, -26, 24, 12, 3);
+      poly(ctx, '#f8fafc', [78, -9, 92, -2, 78, 5]);
+      rect(ctx, '#1e293b', 70, -16, 10, 28, 3);
+    },
   };
 
   // Dessine une arme à l'origine du contexte courant.
@@ -1731,6 +1893,323 @@ globalThis.BUFFET_FIREBASE = {
   };
 
   D.WEAPON_BOX = BOX;
+})();
+
+</script>
+<script>
+/*!
+ * Tout dans le Buffet — extension Chrome
+ * Copyright © 2026 xNoJoker. Tous droits réservés. Voir LICENSE.txt.
+ *
+ * Décors dessinés à la main en code (aucune image externe). Chaque décor est peint
+ * une seule fois dans une image en cache, puis affiché derrière le personnage.
+ */
+(() => {
+  'use strict';
+  const D = (globalThis.Buffet = globalThis.Buffet || {});
+  if (D.paintDecor) return;
+
+  const INK = '#1c1917';
+  const rnd = (n) => {
+    const x = Math.sin(n * 91.7 + 17.3) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
+  function rect(ctx, color, x, y, w, h, r = 0) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    if (r) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+    ctx.fill();
+  }
+  function disc(ctx, color, x, y, r) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  function vgrad(ctx, W, y0, y1, stops) {
+    const g = ctx.createLinearGradient(0, y0, 0, y1);
+    stops.forEach(([o, c]) => g.addColorStop(o, c));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, y0, W, y1 - y0);
+  }
+  function outline(ctx, w) {
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = w;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  // ---------- Open space ----------
+  function bureau(ctx, W, H, k) {
+    const floor = H - 34 * k;
+    vgrad(ctx, W, 0, floor, [[0, '#cbd5e1'], [1, '#94a3b8']]);
+    rect(ctx, '#64748b', 0, floor - 10 * k, W, 10 * k);
+    // Grande fenêtre sur la ville.
+    const wx = W * 0.08, wy = H * 0.1, ww = Math.min(W * 0.42, 520 * k), wh = H * 0.42;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(wx, wy, ww, wh); ctx.clip();
+    vgrad(ctx, W, wy, wy + wh, [[0, '#7dd3fc'], [1, '#e0f2fe']]);
+    for (let i = 0; i < 9; i++) {
+      const bw = ww / 7, bx = wx + i * bw * 0.85 - 10, bh = wh * (0.35 + rnd(i) * 0.5);
+      rect(ctx, i % 2 ? '#475569' : '#334155', bx, wy + wh - bh, bw * 0.8, bh);
+      ctx.fillStyle = '#fde68a';
+      for (let r = 0; r < 6; r++) for (let c = 0; c < 2; c++) {
+        if (rnd(i * 20 + r * 3 + c) > 0.55) ctx.fillRect(bx + 6 + c * bw * 0.35, wy + wh - bh + 8 + r * 14 * k, 6 * k, 6 * k);
+      }
+    }
+    ctx.restore();
+    ctx.beginPath(); ctx.rect(wx, wy, ww, wh); outline(ctx, 6 * k);
+    ctx.beginPath(); ctx.moveTo(wx + ww / 2, wy); ctx.lineTo(wx + ww / 2, wy + wh); outline(ctx, 4 * k);
+    // Tableau blanc avec un graphique qui chute.
+    const bx = W * 0.6, by = H * 0.14, bw = Math.min(W * 0.28, 300 * k), bh = H * 0.24;
+    rect(ctx, '#f8fafc', bx, by, bw, bh, 6 * k);
+    ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6 * k); outline(ctx, 4 * k);
+    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 4 * k;
+    ctx.beginPath(); ctx.moveTo(bx + 20 * k, by + 30 * k);
+    ctx.lineTo(bx + bw * 0.35, by + bh * 0.4); ctx.lineTo(bx + bw * 0.55, by + bh * 0.3); ctx.lineTo(bx + bw - 20 * k, by + bh - 20 * k);
+    ctx.stroke();
+    ctx.fillStyle = INK; ctx.font = `700 ${14 * k}px system-ui, sans-serif`;
+    ctx.fillText('OBJECTIFS Q4', bx + 14 * k, by + bh - 10 * k);
+    // Horloge.
+    const cx = W * 0.92, cy = H * 0.12;
+    disc(ctx, '#f8fafc', cx, cy, 26 * k);
+    ctx.beginPath(); ctx.arc(cx, cy, 26 * k, 0, Math.PI * 2); outline(ctx, 4 * k);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 16 * k); ctx.moveTo(cx, cy); ctx.lineTo(cx + 12 * k, cy + 4 * k); outline(ctx, 3 * k);
+    // Bureaux et écrans.
+    for (let i = 0; i < 3; i++) {
+      const dx = W * (0.05 + i * 0.36), dw = Math.min(W * 0.26, 260 * k), dy = floor - 70 * k;
+      rect(ctx, '#78716c', dx, dy, dw, 12 * k, 3 * k);
+      rect(ctx, '#57534e', dx + 10 * k, dy + 12 * k, 10 * k, 58 * k);
+      rect(ctx, '#57534e', dx + dw - 20 * k, dy + 12 * k, 10 * k, 58 * k);
+      rect(ctx, '#1e293b', dx + dw * 0.3, dy - 52 * k, 70 * k, 46 * k, 4 * k);
+      rect(ctx, '#38bdf8', dx + dw * 0.3 + 6 * k, dy - 46 * k, 58 * k, 34 * k, 2 * k);
+      rect(ctx, '#1e293b', dx + dw * 0.3 + 30 * k, dy - 6 * k, 10 * k, 6 * k);
+    }
+    // Plante verte.
+    const px = W * 0.97 - 40 * k;
+    rect(ctx, '#b45309', px, floor - 46 * k, 36 * k, 46 * k, 4 * k);
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = i % 2 ? '#16a34a' : '#15803d';
+      ctx.beginPath();
+      ctx.ellipse(px + 18 * k + (i - 2.5) * 9 * k, floor - 70 * k - (i % 3) * 10 * k, 9 * k, 24 * k, (i - 2.5) * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Moquette.
+    vgrad(ctx, W, floor, H, [[0, '#475569'], [1, '#334155']]);
+  }
+
+  // ---------- Salle de classe ----------
+  function ecole(ctx, W, H, k) {
+    const floor = H - 34 * k;
+    vgrad(ctx, W, 0, floor, [[0, '#fef3c7'], [1, '#fde68a']]);
+    rect(ctx, '#d97706', 0, floor - 70 * k, W, 70 * k);
+    rect(ctx, '#92400e', 0, floor - 74 * k, W, 6 * k);
+    // Tableau noir.
+    const bx = W * 0.12, by = H * 0.1, bw = W * 0.76, bh = H * 0.36;
+    rect(ctx, '#92400e', bx - 12 * k, by - 12 * k, bw + 24 * k, bh + 24 * k, 6 * k);
+    rect(ctx, '#14532d', bx, by, bw, bh, 4 * k);
+    rect(ctx, '#78350f', bx, by + bh + 4 * k, bw, 10 * k, 2 * k);
+    rect(ctx, '#f8fafc', bx + bw * 0.7, by + bh - 4 * k, 22 * k, 6 * k, 2 * k);
+    ctx.fillStyle = 'rgba(248,250,252,.9)';
+    ctx.font = `600 ${Math.max(14, 30 * k)}px "Comic Sans MS", "Segoe Print", cursive`;
+    ctx.fillText('2 + 2 = 5 ?', bx + 30 * k, by + 60 * k);
+    ctx.font = `600 ${Math.max(12, 22 * k)}px "Comic Sans MS", "Segoe Print", cursive`;
+    ctx.fillText('Interro surprise demain !', bx + 30 * k, by + 110 * k);
+    ctx.fillText('Ne pas taper sur le délégué.', bx + 30 * k, by + 150 * k);
+    // Horloge et affiches.
+    disc(ctx, '#f8fafc', W * 0.94, H * 0.1, 24 * k);
+    ctx.beginPath(); ctx.arc(W * 0.94, H * 0.1, 24 * k, 0, Math.PI * 2); outline(ctx, 4 * k);
+    rect(ctx, '#38bdf8', W * 0.02, H * 0.14, 46 * k, 64 * k, 3 * k);
+    rect(ctx, '#f472b6', W * 0.02, H * 0.14 + 76 * k, 46 * k, 64 * k, 3 * k);
+    // Pupitres.
+    for (let i = 0; i < 4; i++) {
+      const dx = W * (0.04 + i * 0.25), dw = Math.min(W * 0.17, 160 * k), dy = floor - 52 * k;
+      rect(ctx, '#a16207', dx, dy, dw, 10 * k, 2 * k);
+      rect(ctx, '#3f3f46', dx + 8 * k, dy + 10 * k, 6 * k, 42 * k);
+      rect(ctx, '#3f3f46', dx + dw - 14 * k, dy + 10 * k, 6 * k, 42 * k);
+    }
+    // Carrelage.
+    rect(ctx, '#e7e5e4', 0, floor, W, H - floor);
+    ctx.strokeStyle = '#a8a29e';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 40 * k) { ctx.beginPath(); ctx.moveTo(x, floor); ctx.lineTo(x - 20 * k, H); ctx.stroke(); }
+  }
+
+  // ---------- Parc d'attractions ----------
+  function parc(ctx, W, H, k) {
+    const floor = H - 34 * k;
+    vgrad(ctx, W, 0, floor, [[0, '#38bdf8'], [1, '#bae6fd']]);
+    disc(ctx, '#fde047', W * 0.12, H * 0.14, 46 * k);
+    for (let i = 0; i < 4; i++) {
+      const x = W * (0.25 + i * 0.22), y = H * (0.08 + rnd(i) * 0.12);
+      for (let j = 0; j < 4; j++) disc(ctx, '#f8fafc', x + j * 22 * k, y + (j % 2) * 8 * k, 20 * k);
+    }
+    // Grande roue.
+    const cx = W * 0.76, cy = floor - Math.min(H * 0.42, 300 * k), R = Math.min(H * 0.3, 210 * k);
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 6 * k;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - R * 0.6, floor); ctx.moveTo(cx, cy); ctx.lineTo(cx + R * 0.6, floor); ctx.stroke();
+    ctx.lineWidth = 4 * k;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+    const colors = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2 * k;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.stroke();
+      rect(ctx, colors[i % colors.length], cx + Math.cos(a) * R - 12 * k, cy + Math.sin(a) * R, 24 * k, 18 * k, 4 * k);
+    }
+    disc(ctx, '#334155', cx, cy, 10 * k);
+    // Montagnes russes.
+    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 6 * k;
+    ctx.beginPath();
+    for (let x = 0; x <= W * 0.55; x += 6) {
+      const y = floor - 120 * k - Math.sin(x / (90 * k)) * 70 * k - (x < W * 0.2 ? (W * 0.2 - x) * 0.3 : 0);
+      if (x) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3 * k;
+    for (let x = 20; x <= W * 0.55; x += 50 * k) {
+      const y = floor - 120 * k - Math.sin(x / (90 * k)) * 70 * k - (x < W * 0.2 ? (W * 0.2 - x) * 0.3 : 0);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, floor); ctx.stroke();
+    }
+    // Chapiteau rayé.
+    const tx = W * 0.42, tw = 150 * k, th = 110 * k;
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = i % 2 ? '#f8fafc' : '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(tx + (i * tw) / 6, floor); ctx.lineTo(tx + ((i + 1) * tw) / 6, floor); ctx.lineTo(tx + tw / 2, floor - th);
+      ctx.closePath(); ctx.fill();
+    }
+    // Ballons.
+    for (let i = 0; i < 5; i++) {
+      const x = W * 0.3 + i * 18 * k, y = H * 0.36 - (i % 2) * 14 * k;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, y + 14 * k); ctx.lineTo(W * 0.3 + 36 * k, H * 0.36 + 70 * k); ctx.stroke();
+      ctx.fillStyle = colors[i];
+      ctx.beginPath(); ctx.ellipse(x, y, 11 * k, 14 * k, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    vgrad(ctx, W, floor, H, [[0, '#4ade80'], [1, '#16a34a']]);
+  }
+
+  // ---------- Ville en ruines ----------
+  function apocalypse(ctx, W, H, k) {
+    const floor = H - 34 * k;
+    vgrad(ctx, W, 0, floor, [[0, '#7c2d12'], [0.55, '#ea580c'], [1, '#fdba74']]);
+    disc(ctx, 'rgba(254,215,170,.6)', W * 0.7, H * 0.25, 60 * k);
+    // Fumée.
+    for (let i = 0; i < 14; i++) disc(ctx, `rgba(41,37,36,${0.25 + rnd(i) * 0.25})`, W * rnd(i + 3), H * (0.05 + rnd(i + 9) * 0.3), (40 + rnd(i + 5) * 70) * k);
+    // Immeubles cassés.
+    for (let i = 0; i < 9; i++) {
+      const bw = W / 8, bx = i * bw * 0.95 - 20, bh = (H * 0.3) + rnd(i + 30) * H * 0.35;
+      const top = floor - bh;
+      ctx.fillStyle = i % 2 ? '#292524' : '#1c1917';
+      ctx.beginPath();
+      ctx.moveTo(bx, floor); ctx.lineTo(bx, top + 20 * k);
+      for (let j = 1; j <= 5; j++) ctx.lineTo(bx + (bw * 0.85 * j) / 5, top + (rnd(i * 7 + j) * 50 - 10) * k);
+      ctx.lineTo(bx + bw * 0.85, floor);
+      ctx.closePath(); ctx.fill();
+      for (let r = 0; r < 8; r++) for (let c = 0; c < 3; c++) {
+        const y = top + 40 * k + r * 24 * k;
+        if (y > floor - 20 * k) continue;
+        ctx.fillStyle = rnd(i * 50 + r * 5 + c) > 0.8 ? '#fb923c' : '#0c0a09';
+        ctx.fillRect(bx + 10 * k + c * bw * 0.25, y, 10 * k, 12 * k);
+      }
+    }
+    // Voiture en feu.
+    const cx = W * 0.14, cy = floor - 26 * k;
+    rect(ctx, '#57534e', cx, cy - 10 * k, 110 * k, 26 * k, 6 * k);
+    rect(ctx, '#44403c', cx + 20 * k, cy - 30 * k, 60 * k, 22 * k, 6 * k);
+    disc(ctx, '#0c0a09', cx + 22 * k, cy + 16 * k, 12 * k);
+    disc(ctx, '#0c0a09', cx + 88 * k, cy + 16 * k, 12 * k);
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = i % 2 ? '#facc15' : '#f97316';
+      ctx.beginPath();
+      const fx = cx + 30 * k + i * 10 * k;
+      ctx.moveTo(fx - 10 * k, cy - 28 * k); ctx.quadraticCurveTo(fx, cy - (70 + rnd(i) * 30) * k, fx + 10 * k, cy - 28 * k);
+      ctx.fill();
+    }
+    // Gravats et asphalte fissuré.
+    vgrad(ctx, W, floor, H, [[0, '#44403c'], [1, '#292524']]);
+    for (let i = 0; i < 18; i++) disc(ctx, '#57534e', W * rnd(i + 60), floor + 4 * k, (4 + rnd(i + 70) * 12) * k);
+    ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      const x = W * rnd(i + 80);
+      ctx.beginPath(); ctx.moveTo(x, floor + 6 * k); ctx.lineTo(x + 20 * k, floor + 18 * k); ctx.lineTo(x + 10 * k, H); ctx.stroke();
+    }
+  }
+
+  // ---------- Base lunaire ----------
+  function lune(ctx, W, H, k) {
+    const floor = H - 34 * k;
+    rect(ctx, '#020617', 0, 0, W, floor);
+    for (let i = 0; i < 160; i++) disc(ctx, `rgba(248,250,252,${0.3 + rnd(i) * 0.7})`, W * rnd(i + 1), floor * rnd(i + 200), (0.6 + rnd(i + 400) * 1.4) * k);
+    // La Terre.
+    const ex = W * 0.8, ey = H * 0.18, er = 54 * k;
+    disc(ctx, '#2563eb', ex, ey, er);
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath(); ctx.ellipse(ex - 14 * k, ey - 10 * k, 20 * k, 26 * k, 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ex + 22 * k, ey + 16 * k, 16 * k, 12 * k, -0.3, 0, Math.PI * 2); ctx.fill();
+    disc(ctx, 'rgba(248,250,252,.35)', ex - 18 * k, ey - 24 * k, 12 * k);
+    // Sol lunaire en relief.
+    ctx.fillStyle = '#9ca3af';
+    ctx.beginPath(); ctx.moveTo(0, floor - 60 * k);
+    for (let x = 0; x <= W; x += 40) ctx.lineTo(x, floor - 60 * k - Math.sin(x / 140) * 26 * k - rnd(x) * 10 * k);
+    ctx.lineTo(W, floor); ctx.lineTo(0, floor); ctx.closePath(); ctx.fill();
+    // Dôme de la base.
+    const dx = W * 0.2, dr = 90 * k;
+    ctx.fillStyle = 'rgba(186,230,253,.55)';
+    ctx.beginPath(); ctx.arc(dx, floor - 40 * k, dr, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(dx, floor - 40 * k, dr, Math.PI, 0); outline(ctx, 4 * k);
+    rect(ctx, '#e5e7eb', dx - dr - 10 * k, floor - 44 * k, dr * 2 + 20 * k, 14 * k, 3 * k);
+    // Antenne.
+    ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 3 * k;
+    ctx.beginPath(); ctx.moveTo(W * 0.55, floor - 40 * k); ctx.lineTo(W * 0.55, floor - 150 * k); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W * 0.55, floor - 150 * k, 26 * k, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
+    disc(ctx, '#ef4444', W * 0.55, floor - 150 * k, 4 * k);
+    vgrad(ctx, W, floor - 8 * k, H, [[0, '#6b7280'], [1, '#4b5563']]);
+    for (let i = 0; i < 10; i++) {
+      ctx.fillStyle = 'rgba(31,41,55,.45)';
+      ctx.beginPath(); ctx.ellipse(W * rnd(i + 500), floor + 12 * k, (12 + rnd(i + 510) * 30) * k, 5 * k, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  const PAINTERS = { bureau, ecole, parc, apocalypse, lune };
+
+  // Peint le décor `id` sur un contexte de W × H (le sol est en bas de l'image).
+  D.paintDecor = (ctx, id, W, H) => {
+    const paint = PAINTERS[id];
+    if (!paint) return false;
+    const k = Math.max(0.5, Math.min(1.4, H / 800));
+    ctx.save();
+    paint(ctx, W, H, k);
+    ctx.restore();
+    return true;
+  };
+
+  // Vignette d'aperçu pour le choix du décor.
+  D.decorThumb = (id, w, h) => {
+    const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
+    const c = document.createElement('canvas');
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    c.style.width = `${w}px`;
+    c.style.height = `${h}px`;
+    const ctx = c.getContext('2d');
+    if (id === 'page') {
+      ctx.fillStyle = '#e5e7eb';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = '#9ca3af';
+      for (let i = 0; i < 5; i++) ctx.fillRect(c.width * 0.12, c.height * (0.18 + i * 0.14), c.width * (0.5 + rnd(i) * 0.3), c.height * 0.06);
+      return c;
+    }
+    // On peint en grand puis on réduit, pour garder les proportions du décor réel.
+    const big = document.createElement('canvas');
+    big.width = 960;
+    big.height = 600;
+    D.paintDecor(big.getContext('2d'), id, 960, 600);
+    ctx.drawImage(big, 0, 0, c.width, c.height);
+    return c;
+  };
 })();
 
 </script>
@@ -1925,6 +2404,41 @@ globalThis.BUFFET_FIREBASE = {
       [523, 659, 784, 1047].forEach((f, i) => this.tone({ f0: f, dur: 0.14, gain: 0.15, delay: i * 0.07 }));
     }
 
+    magnum() {
+      this.noise({ dur: 0.3, gain: 1, f0: 6000, f1: 200 });
+      this.tone({ f0: 130, f1: 34, dur: 0.22, gain: 1 });
+    }
+
+    sniper() {
+      this.noise({ dur: 0.08, gain: 1, type: 'highpass', f0: 3000 });
+      this.noise({ dur: 0.6, gain: 0.8, f0: 3000, f1: 80 });
+      this.tone({ f0: 110, f1: 30, dur: 0.4, gain: 1 });
+    }
+
+    bow() {
+      this.tone({ type: 'triangle', f0: 180, f1: 90, dur: 0.12, gain: 0.25 });
+      this.noise({ dur: 0.2, gain: 0.3, type: 'bandpass', f0: 1200, f1: 3000, q: 2 });
+    }
+
+    zap() {
+      this.tone({ type: 'sawtooth', f0: 1400, f1: 300, dur: 0.18, gain: 0.12, lp: 3500 });
+      this.tone({ type: 'sine', f0: 600, f1: 1800, dur: 0.12, gain: 0.08 });
+    }
+
+    smash() {
+      this.noise({ dur: 0.25, gain: 1, f0: 900, f1: 60 });
+      this.tone({ f0: 90, f1: 30, dur: 0.3, gain: 1 });
+    }
+
+    glass() {
+      for (let i = 0; i < 5; i++) this.tone({ type: 'triangle', f0: 2500 + Math.random() * 2500, dur: 0.08, gain: 0.07, delay: i * 0.03 });
+      this.noise({ dur: 0.2, gain: 0.4, type: 'highpass', f0: 3000 });
+    }
+
+    beep() {
+      this.tone({ type: 'square', f0: 2200, dur: 0.05, gain: 0.05 });
+    }
+
     slash() {
       this.noise({ dur: 0.14, gain: 0.45, type: 'bandpass', f0: 2500, f1: 6000, q: 2 });
       this.tone({ type: 'triangle', f0: 1400, f1: 3200, dur: 0.08, gain: 0.06 });
@@ -2049,22 +2563,32 @@ globalThis.BUFFET_FIREBASE = {
   const EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
   const GUN_SCALE = 1.1;
   // Armes tenues en bas à droite de l'écran, qui visent le curseur.
-  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme', 'lancegrenades', 'laser']);
-  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5, lancegrenades: -3, laser: -2 };
-  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0, lancegrenades: 12, laser: 0 };
+  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme', 'lancegrenades', 'laser', 'revolver', 'sniper', 'arbalete', 'minigun', 'plasma', 'missile']);
+  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5, lancegrenades: -3, laser: -2, revolver: -7, sniper: -4, arbalete: 0, minigun: -1, plasma: -1, missile: -2 };
+  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0, lancegrenades: 12, laser: 0, revolver: 16, sniper: 22, arbalete: 6, minigun: 3, plasma: 8, missile: 14 };
   const HP_MAX = { head: 90, torso: 160, lArm: 55, rArm: 55, lLeg: 70, rLeg: 70 };
   const BLAST = {
     grenade: { power: 2600, radius: 300, dmg: 110, label: 'BOUM !' },
     dynamite: { power: 3400, radius: 380, dmg: 190, label: 'KABOOM !' },
     roquette: { power: 3000, radius: 280, dmg: 170, label: 'BADABOUM !' },
     lancegrenades: { power: 2200, radius: 220, dmg: 80, label: 'BOUM !' },
+    mine: { power: 3600, radius: 240, dmg: 170, label: 'BOUM !' },
+    plasma: { power: 1800, radius: 140, dmg: 55, label: 'ZAP !' },
+    missile: { power: 3200, radius: 300, dmg: 180, label: 'KABOOM !' },
     frappe: { power: 3000, radius: 260, dmg: 120, label: 'BOOOM !' },
   };
   // Expérience gagnée par coup, selon l'arme (multipliée par le combo en cours).
   const XP_PER_HIT = {
     pistolet: 6, mitraillette: 3, pompe: 8, grenade: 14, katana: 7, flamme: 2, dynamite: 16,
     tronconneuse: 3, roquette: 16, lancegrenades: 10, laser: 2, frappe: 12, wall: 5,
+    batte: 6, revolver: 10, masse: 12, arbalete: 10, molotov: 3, sniper: 18, mine: 18, minigun: 2, plasma: 12, missile: 18,
   };
+  // Armes de mêlée maniées d'un geste (katana et batte).
+  const SWIPE = {
+    katana: { dmg: 34, force: 500, decal: 'blood', words: ['TCHAK!', 'SLASH!'], color: '#e5e7eb' },
+    batte: { dmg: 22, force: 1300, decal: 'bruise', words: ['BONK!', 'POC!'], color: '#fb923c' },
+  };
+  const IS_WEB = (() => { try { return chrome.runtime.id === 'web'; } catch { return false; } })();
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -2105,6 +2629,7 @@ globalThis.BUFFET_FIREBASE = {
     /* Armes verrouillées */
     .bar button { position: relative; }
     .bar button.locked { opacity: .4; }
+    .bar [hidden] { display: none !important; }
     .bar .lock {
       position: absolute; right: 0; bottom: -1px; padding: 1px 3px; border-radius: 6px;
       background: #18181b; color: #fde047; font: 800 9px/1 system-ui, sans-serif;
@@ -2165,6 +2690,17 @@ globalThis.BUFFET_FIREBASE = {
       background: #dc2626; color: #fff; font: 900 16px/1 system-ui, sans-serif; cursor: pointer;
     }
     .up-stat button:disabled { background: #3f3f46; color: #71717a; cursor: default; }
+    .up h3 { margin: 16px 0 8px; font: 800 12px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #a1a1aa; }
+    .decor-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+    .decor {
+      all: unset; box-sizing: border-box; display: grid; gap: 5px; padding: 5px; border-radius: 10px;
+      background: #27272a; border: 2px solid transparent; cursor: pointer; text-align: center;
+      font: 700 12px/1.2 system-ui, "Segoe UI", sans-serif;
+    }
+    .decor canvas { display: block; width: 100% !important; height: auto !important; border-radius: 6px; }
+    .decor.on { border-color: #dc2626; }
+    .decor.locked { opacity: .45; cursor: not-allowed; }
+    .decor:focus-visible { outline: 2px solid #fca5a5; }
 
     /* Notifications */
     .toast {
@@ -2326,11 +2862,12 @@ globalThis.BUFFET_FIREBASE = {
       const head = el('div', { class: 'up-head' });
       this.upPts = el('span', { class: 'up-pts' });
       const close = el('button', { type: 'button', class: 'up-close', 'aria-label': 'Fermer', 'data-a': 'up-close' }, '✕');
-      head.append(el('h2', {}, 'Améliorations'), this.upPts, close);
+      head.append(el('h2', {}, 'Améliorations et décors'), this.upPts, close);
       this.upNext = el('p', { class: 'up-info' });
       const legend = el('p', { class: 'up-info' }, 'Chaque niveau gagné donne 1 point. Dégâts : fait plus mal. Cadence : tire plus vite. Puissance : projette plus fort, explosions et portée plus grandes.');
       this.upList = el('div');
-      box.append(head, this.upNext, legend, this.upList);
+      this.decorList = el('div', { class: 'decor-list' });
+      box.append(head, this.upNext, el('h3', {}, 'Décors'), this.decorList, el('h3', {}, 'Armes'), legend, this.upList);
       this.upEl.append(box);
       this.upEl.addEventListener('click', (e) => {
         const btn = e.target.closest('button');
@@ -2339,6 +2876,7 @@ globalThis.BUFFET_FIREBASE = {
           const [weapon, stat] = btn.dataset.up.split(':');
           this.upgrade(weapon, stat);
         }
+        if (btn?.dataset.decor) this.chooseDecor(btn.dataset.decor);
       });
 
       this.toastEl = el('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
@@ -2396,7 +2934,7 @@ globalThis.BUFFET_FIREBASE = {
     }
 
     stopLoops() {
-      for (const name of ['flame', 'saw', 'laser']) this.sfx.loopStop(name);
+      for (const name of ['flame', 'saw', 'laser', 'minigun']) this.sfx.loopStop(name);
       this.beam = null;
       this.blade = null;
     }
@@ -2421,9 +2959,12 @@ globalThis.BUFFET_FIREBASE = {
       this.lvlText.parentElement.title = info.need
         ? `Niveau ${info.level} : ${info.into} / ${info.need} XP. Clique pour les améliorations.`
         : `Niveau maximum. Clique pour les améliorations.`;
+      const level = D.levelInfo(this.progress.xp).level;
+      const nextLevel = Math.min(...D.WEAPONS.map((w) => D.UNLOCKS[w.id]).filter((l) => l > level), Infinity);
       for (const w of D.WEAPONS) {
         const btn = this.weaponButtons[w.id];
         const locked = !D.isUnlocked(this.progress, w.id);
+        btn.hidden = locked && D.UNLOCKS[w.id] > nextLevel;
         btn.classList.toggle('locked', locked);
         const lock = btn.querySelector('.lock');
         lock.hidden = !locked;
@@ -2450,6 +2991,9 @@ globalThis.BUFFET_FIREBASE = {
       this.burstStars(c.x, c.y - 120 * this.body.s, 14);
       const fresh = D.WEAPONS.filter((w) => D.UNLOCKS[w.id] > from && D.UNLOCKS[w.id] <= to);
       for (const w of fresh) this.toast(`🔓 Nouvelle arme : ${w.short} !`);
+      for (const d of D.DECORS.filter((x) => x.level > from && x.level <= to && !(x.extensionOnly && IS_WEB))) {
+        this.toast(`🖼️ Nouveau décor : ${d.label} !`);
+      }
       this.toast(`⭐ Niveau ${to} : +${to - from} point${to - from > 1 ? 's' : ''} d'amélioration`);
       if (fresh.length) this.say(D.pick(D.PHRASES.levelup), true);
     }
@@ -2549,6 +3093,7 @@ globalThis.BUFFET_FIREBASE = {
       const next = D.WEAPONS.find((w) => D.UNLOCKS[w.id] > info.level);
       const xpLine = info.need ? `Niveau ${info.level} · ${info.into} / ${info.need} XP` : `Niveau ${info.level} (maximum)`;
       this.upNext.textContent = next ? `${xpLine} · Prochaine arme : ${next.short} au niveau ${D.UNLOCKS[next.id]}` : `${xpLine} · Toutes les armes sont débloquées !`;
+      this.renderDecors();
       this.upList.replaceChildren();
       for (const w of D.WEAPONS) {
         if (w.id === 'main') continue;
@@ -2573,6 +3118,44 @@ globalThis.BUFFET_FIREBASE = {
         row.append(info2);
         this.upList.append(row);
       }
+    }
+
+    decorId() {
+      const fallback = IS_WEB ? 'bureau' : 'page';
+      const id = this.settings.decor;
+      const ok = D.DECORS.some((d) => d.id === id && !(d.extensionOnly && IS_WEB)) && D.isDecorUnlocked(this.progress, id);
+      return ok ? id : fallback;
+    }
+
+    renderDecors() {
+      this.thumbs = this.thumbs || {};
+      const current = this.decorId();
+      this.decorList.replaceChildren();
+      for (const d of D.DECORS) {
+        if (d.extensionOnly && IS_WEB) continue;
+        const locked = !D.isDecorUnlocked(this.progress, d.id);
+        const btn = el('button', { type: 'button', class: `decor${d.id === current ? ' on' : ''}${locked ? ' locked' : ''}`, 'data-decor': d.id, 'aria-pressed': String(d.id === current) });
+        this.thumbs[d.id] = this.thumbs[d.id] || D.decorThumb(d.id, 120, 75);
+        const thumb = el('canvas');
+        thumb.width = this.thumbs[d.id].width;
+        thumb.height = this.thumbs[d.id].height;
+        thumb.getContext('2d').drawImage(this.thumbs[d.id], 0, 0);
+        btn.append(thumb, el('span', {}, locked ? `🔒 ${d.label} · niv. ${d.level}` : d.label));
+        this.decorList.append(btn);
+      }
+    }
+
+    chooseDecor(id) {
+      const d = D.DECORS.find((x) => x.id === id);
+      if (!d) return;
+      if (!D.isDecorUnlocked(this.progress, id)) {
+        this.sfx.denied();
+        this.toast(`🔒 ${d.label} : débloqué au niveau ${d.level}`);
+        return;
+      }
+      this.settings.decor = id;
+      D.saveSettings({ decor: id }).catch(() => {});
+      this.renderDecors();
     }
 
     upgrade(weapon, stat) {
@@ -2735,7 +3318,16 @@ globalThis.BUFFET_FIREBASE = {
         case 'dynamite': this.placeDynamite(x, y, now); break;
         case 'frappe': if (this.every('shot', 3500 * this.m('rate'), now)) this.airStrike(x, now); else this.sfx.denied(); break;
         case 'flamme': this.sfx.loopStart('flame', { freq: 700, gain: 0.3 }); break;
-        case 'katana': this.blade = { x, y }; break;
+        case 'katana': case 'batte': this.blade = { x, y }; break;
+        case 'revolver': if (this.every('shot', 450 * this.m('rate'), now)) this.shoot('revolver', now); break;
+        case 'sniper': if (this.every('shot', 1300 * this.m('rate'), now)) this.shoot('sniper', now); else this.sfx.denied(); break;
+        case 'minigun': this.spinStart = now; this.sfx.hum('minigun', { type: 'sawtooth', freq: 55, lfo: 40, depth: 20, gain: 0.08, lp: 900 }); break;
+        case 'arbalete': if (this.every('shot', 900 * this.m('rate'), now)) this.fireBolt(x, y); break;
+        case 'plasma': if (this.every('shot', 500 * this.m('rate'), now)) this.firePlasma(x, y); break;
+        case 'missile': if (this.every('shot', 1600 * this.m('rate'), now)) this.launchMissile(now); else this.sfx.denied(); break;
+        case 'masse': if (this.every('shot', 700 * this.m('rate'), now)) this.smash(x, y, now); break;
+        case 'molotov': if (this.every('throw', 400 * this.m('rate'), now)) this.throwMolotov(x, y); break;
+        case 'mine': this.placeMine(x, now); break;
         case 'tronconneuse': this.sfx.hum('saw', { type: 'sawtooth', freq: 70, lfo: 28, depth: 25, gain: 0.14, lp: 1400 }); break;
         case 'laser': this.sfx.hum('laser', { type: 'sine', freq: 880, lfo: 9, depth: 40, gain: 0.07, lp: 4000 }); break;
       }
@@ -2791,6 +3383,22 @@ globalThis.BUFFET_FIREBASE = {
         this.sfx.smg();
         D.track('shots');
         this.shake = Math.max(this.shake, 2);
+      } else if (kind === 'minigun') {
+        if (this.bullet(g, m.x + rand(-22, 22), m.y + rand(-22, 22), { dmg: 6 * this.m('dmg'), force: 380 * this.m('power'), blood: 3 }, now)) hits++;
+        this.sfx.smg();
+        D.track('shots');
+        this.shake = Math.max(this.shake, 3);
+      } else if (kind === 'revolver') {
+        if (this.bullet(g, m.x, m.y, { dmg: 48 * this.m('dmg'), force: 1500 * this.m('power'), blood: 14 }, now)) hits++;
+        this.sfx.magnum();
+        D.track('shots');
+        this.shake = Math.max(this.shake, 7);
+      } else if (kind === 'sniper') {
+        // Très gros dégâts : un tir à la tête suffit en mode gore.
+        if (this.bullet(g, m.x, m.y, { dmg: 95 * this.m('dmg'), force: 2200 * this.m('power'), blood: 20 }, now)) hits++;
+        this.sfx.sniper();
+        D.track('shots');
+        this.shake = Math.max(this.shake, 9);
       } else {
         if (this.bullet(g, m.x, m.y, { dmg: 30 * this.m('dmg'), force: 1000 * this.m('power'), blood: 10 }, now)) hits++;
         this.sfx.pistol();
@@ -2800,8 +3408,9 @@ globalThis.BUFFET_FIREBASE = {
       this.sfx.shell();
       if (hits) {
         this.registerHit(kind, now);
-        if (kind !== 'mitraillette') {
-          this.text(m.x, m.y - 40, D.pick(kind === 'pompe' ? ['BLAM!', 'KABLAM!'] : ['BANG!', 'PAN!']), '#facc15', kind === 'pompe' ? 56 : 44);
+        if (kind !== 'mitraillette' && kind !== 'minigun') {
+          const big = kind === 'pompe' || kind === 'sniper' || kind === 'revolver';
+          this.text(m.x, m.y - 40, D.pick(big ? ['BLAM!', 'KABLAM!'] : ['BANG!', 'PAN!']), '#facc15', big ? 56 : 44);
         }
       }
     }
@@ -2863,8 +3472,9 @@ globalThis.BUFFET_FIREBASE = {
       }
     }
 
-    // Katana : un geste rapide à travers le corps tranche tout ce qu'il croise.
-    katana(now) {
+    // Katana et batte : un geste rapide à travers le corps frappe tout ce qu'il croise.
+    swipe(now) {
+      const kind = this.settings.weapon, cfg = SWIPE[kind];
       const m = this.mouse, b = this.body;
       const prev = this.blade || { x: m.x, y: m.y };
       this.blade = { x: m.x, y: m.y };
@@ -2886,16 +3496,18 @@ globalThis.BUFFET_FIREBASE = {
       for (const [part, hit] of parts) {
         if (!this.every(`kat-${part}`, 200 * this.m('rate'), now)) continue;
         any = true;
-        const f = 500 * this.m('power');
+        const f = cfg.force * this.m('power');
         b.impulse(hit.x, hit.y, ux * f, uy * f - 150, 50 * b.s);
-        this.wound(hit.name, hit.x, hit.y, ux, uy, 9, 'blood');
+        this.wound(hit.name, hit.x, hit.y, ux, uy, kind === 'batte' ? 4 : 9, cfg.decal);
         if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
-        this.damage(part, 34 * this.m('dmg'), now);
+        this.damage(part, cfg.dmg * this.m('dmg'), now);
       }
       if (any) {
-        b.knock(now, 600);
-        this.text(m.x, m.y - 30, D.pick(['TCHAK!', 'SLASH!', 'ZING!']), '#e5e7eb', 40);
-        this.registerHit('katana', now);
+        b.knock(now, kind === 'batte' ? 1100 : 600);
+        if (kind === 'batte') { this.sfx.impact(1); this.shake = Math.max(this.shake, 6); }
+        const homeRun = kind === 'batte' && len > 60;
+        this.text(m.x, m.y - 30, homeRun ? 'HOME RUN!' : D.pick(cfg.words), cfg.color, homeRun ? 54 : 40);
+        this.registerHit(kind, now);
       }
     }
 
@@ -2975,10 +3587,113 @@ globalThis.BUFFET_FIREBASE = {
       this.say(D.pick(D.PHRASES.frappe), true);
     }
 
+    // Arbalète : carreau rapide qui reste planté dans le corps.
+    fireBolt(x, y) {
+      const g = this.gun();
+      const dx = x - g.nx, dy = y - g.ny, len = Math.hypot(dx, dy) || 1;
+      this.objects.push({ kind: 'carreau', x: g.nx, y: g.ny, vx: (dx / len) * 1900, vy: (dy / len) * 1900, life: 1.5 });
+      this.recoil = RECOIL.arbalete;
+      this.sfx.bow();
+      D.track('shots');
+    }
+
+    boltHit(o, hit, now) {
+      const b = this.body, sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
+      const f = 900 * this.m('power', 'arbalete');
+      b.impulse(o.x, o.y, ux * f, uy * f, 50 * b.s);
+      b.knock(now, 900);
+      this.addDecal(hit.name, o.x, o.y, 'bolt', 26 * b.s, { rot: Math.atan2(uy, ux) - b.angleOf(hit.name) });
+      this.bleed(o.x, o.y, -ux, -uy, 6);
+      if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
+      this.damage(b.partOf(hit.name), 45 * this.m('dmg', 'arbalete') * (hit.name === 'head' ? 1.7 : 1), now);
+      this.sfx.impact(0.7);
+      this.text(o.x, o.y - 30, 'TCHOK!', '#e5e7eb', 40);
+      this.registerHit('arbalete', now);
+    }
+
+    // Fusil à plasma : boule d'énergie qui éclate en petite explosion.
+    firePlasma(x, y) {
+      const g = this.gun();
+      const dx = x - g.nx, dy = y - g.ny, len = Math.hypot(dx, dy) || 1;
+      this.objects.push({ kind: 'plasma', x: g.nx, y: g.ny, vx: (dx / len) * 1300, vy: (dy / len) * 1300, left: len / 1300 });
+      this.recoil = RECOIL.plasma;
+      this.muzzle = 1;
+      this.sfx.zap();
+      D.track('shots');
+    }
+
+    // Missile à tête chercheuse : il tourne vers le personnage, même s'il bouge.
+    launchMissile(now) {
+      const g = this.gun();
+      this.objects.push({ kind: 'missile', x: g.nx, y: g.ny, ang: g.ang, speed: 500, born: now });
+      this.recoil = RECOIL.missile;
+      this.muzzle = 1;
+      this.sfx.rocket();
+      D.track('explosives');
+      this.shake = Math.max(this.shake, 6);
+      this.say(D.pick(D.PHRASES.missile), true);
+    }
+
+    // Masse : gros coup vers le bas à l'endroit visé.
+    smash(x, y, now) {
+      const b = this.body;
+      this.massSwing = 1;
+      const hit = b.hitTest(x, y, 12 * b.s);
+      if (!hit) {
+        this.sfx.smash();
+        this.shake = Math.max(this.shake, 4);
+        return;
+      }
+      const p = this.m('power');
+      b.impulse(x, y, rand(-300, 300) * p, 1600 * p, 110 * b.s);
+      b.knock(now, 1600);
+      this.addDecal(hit.name, x, y, 'bruise', rand(12, 18) * b.s);
+      this.bleed(x, y, 0, -1, 10, 450);
+      this.burstStars(x, y, 10);
+      this.text(x, y - 30, D.pick(['CRAC!', 'SPLONK!', 'BONK!']), '#fb923c', 58);
+      this.sfx.smash();
+      this.shake = Math.max(this.shake, 14);
+      if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
+      this.damage(b.partOf(hit.name), 50 * this.m('dmg'), now);
+      this.registerHit('masse', now);
+    }
+
+    // Cocktail Molotov : se brise et laisse une nappe de feu au sol.
+    throwMolotov(x, y) {
+      const sx = clamp(x + rand(-200, 200), 30, this.W - 30);
+      this.objects.push({ kind: 'molotov', sx, sy: this.H + 30, tx: x, ty: y, t: 0, dur: 0.55, arc: rand(150, 220), x: sx, y: this.H + 30, rot: 0 });
+      this.sfx.clink();
+      D.track('explosives');
+    }
+
+    shatter(o, now, direct) {
+      this.sfx.glass();
+      this.sfx.noise({ dur: 0.5, gain: 0.5, f0: 600, f1: 200 });
+      for (let i = 0; i < 20; i++) {
+        const life = rand(0.4, 0.8);
+        this.spawn({ type: 'fire', x: o.x + rand(-20, 20), y: o.y + rand(-10, 10), vx: rand(-200, 200), vy: rand(-300, 0), r: rand(8, 16), grow: 40, life, max: life });
+      }
+      this.objects.push({ kind: 'feu', x: o.x, y: this.H - 4, w: 140 * this.m('power', 'molotov'), until: now + 4500 });
+      this.text(o.x, o.y - 30, 'FWOOSH!', '#f97316', 50);
+      if (direct) {
+        this.burnUntil = Math.max(this.burnUntil, now + 3500);
+        this.registerHit('molotov', now);
+      }
+    }
+
+    // Mine : posée au sol, elle explose quand le personnage passe dessus.
+    placeMine(x, now) {
+      if (this.objects.filter((o) => o.kind === 'mine').length >= 4) { this.sfx.denied(); return; }
+      this.objects.push({ kind: 'mine', x: clamp(x, 30, this.W - 30), y: this.H - 10, armed: now + 700, beep: 0 });
+      this.sfx.tick();
+      D.track('explosives');
+      if (this.nearBody(x, this.H - 10, 160)) this.say(D.pick(D.PHRASES.mine), true);
+    }
+
     // ---------- Explosifs ----------
 
     throwGrenade(x, y, now) {
-      if (!this.every('throw', 250 * this.m('rate'), now) || this.objects.length >= 6) return;
+      if (!this.every('throw', 250 * this.m('rate'), now) || this.objects.filter((o) => o.kind === 'grenade').length >= 4) return;
       const sx = clamp(x + rand(-200, 200), 30, this.W - 30);
       D.track('explosives');
       this.objects.push({ kind: 'grenade', fly: true, sx, sy: this.H + 30, tx: x, ty: y, t: 0, dur: 0.5, arc: rand(150, 230), x: sx, y: this.H + 30, vx: 0, vy: 0, rot: 0, born: now, fuse: 2000 * this.m('rate'), tick: 0 });
@@ -3076,6 +3791,83 @@ globalThis.BUFFET_FIREBASE = {
           if (o.t >= 1 || b.hitTest(o.x, o.y, 4 * b.s)) {
             this.objects.splice(i, 1);
             this.explode(o.x, clamp(o.y, 0, this.H - 4), 'lancegrenades', now);
+          }
+          continue;
+        }
+        if (o.kind === 'carreau') {
+          let hit = null;
+          for (let k = 0; k < 3 && !hit; k++) {
+            o.x += (o.vx * DT) / 3;
+            o.y += (o.vy * DT) / 3;
+            hit = b.hitTest(o.x, o.y, 2 * b.s);
+          }
+          o.life -= DT;
+          if (hit) { this.objects.splice(i, 1); this.boltHit(o, hit, now); }
+          else if (o.life <= 0 || o.x < -60 || o.x > this.W + 60 || o.y < -60 || o.y > this.H + 60) this.objects.splice(i, 1);
+          continue;
+        }
+        if (o.kind === 'plasma') {
+          o.x += o.vx * DT;
+          o.y += o.vy * DT;
+          o.left -= DT;
+          if (Math.random() < 0.7) this.spawn({ type: 'spark', x: o.x, y: o.y, vx: rand(-80, 80), vy: rand(-80, 80), life: 0.25, max: 0.25 });
+          if (o.left <= 0 || b.hitTest(o.x, o.y, 6 * b.s)) {
+            this.objects.splice(i, 1);
+            this.explode(o.x, clamp(o.y, 0, this.H - 4), 'plasma', now);
+          }
+          continue;
+        }
+        if (o.kind === 'missile') {
+          const target = b.center();
+          const want = Math.atan2(target.y - o.y, target.x - o.x);
+          let diff = want - o.ang;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          o.ang += clamp(diff, -4.5 * DT, 4.5 * DT);
+          o.speed = Math.min(1300, o.speed + 900 * DT);
+          o.x += Math.cos(o.ang) * o.speed * DT;
+          o.y += Math.sin(o.ang) * o.speed * DT;
+          this.spawn({ type: 'smoke', x: o.x - Math.cos(o.ang) * 18, y: o.y - Math.sin(o.ang) * 18, vx: rand(-20, 20), vy: rand(-30, 0), r: rand(4, 8), grow: 30, life: 0.7, max: 0.7 });
+          const out = o.x < -200 || o.x > this.W + 200 || o.y < -300 || o.y > this.H - 4;
+          if (b.hitTest(o.x, o.y, 6 * b.s) || out || now - o.born > 6000) {
+            this.objects.splice(i, 1);
+            this.explode(clamp(o.x, 0, this.W), clamp(o.y, 0, this.H - 4), 'missile', now);
+          }
+          continue;
+        }
+        if (o.kind === 'molotov') {
+          o.t += DT / o.dur;
+          const t = Math.min(1, o.t);
+          o.x = o.sx + (o.tx - o.sx) * t;
+          o.y = o.sy + (o.ty - o.sy) * t - o.arc * Math.sin(Math.PI * t);
+          o.rot += 0.25;
+          const direct = t > 0.3 && b.hitTest(o.x, o.y, 6 * b.s);
+          if (direct || o.t >= 1) {
+            this.objects.splice(i, 1);
+            this.shatter(o, now, !!direct || this.nearBody(o.x, o.y, 60));
+          }
+          continue;
+        }
+        if (o.kind === 'feu') {
+          for (let k = 0; k < 3; k++) {
+            const life = rand(0.35, 0.6);
+            this.spawn({ type: 'fire', x: o.x + rand(-o.w / 2, o.w / 2), y: this.H - 6, vx: rand(-20, 20), vy: rand(-260, -120), r: rand(6, 12), grow: 30, life, max: life });
+          }
+          const inFire = b.pts.some((p) => Math.abs(p.x - o.x) < o.w / 2 && p.y > this.H - 90);
+          if (inFire) {
+            this.burnUntil = Math.max(this.burnUntil, now + 1500);
+            if (this.every('feuHit', 700, now)) this.registerHit('molotov', now);
+          }
+          if (now > o.until) this.objects.splice(i, 1);
+          continue;
+        }
+        if (o.kind === 'mine') {
+          if (now < o.armed) continue;
+          if (now - o.beep > 900) { o.beep = now; this.sfx.beep(); }
+          const touch = b.pts.some((p) => Math.abs(p.x - o.x) < 34 * b.s && p.y > this.H - 70);
+          if (touch) {
+            this.objects.splice(i, 1);
+            this.explode(o.x, o.y - 6, 'mine', now);
           }
           continue;
         }
@@ -3225,9 +4017,9 @@ globalThis.BUFFET_FIREBASE = {
       }
     }
 
-    addDecal(name, x, y, kind, r) {
+    addDecal(name, x, y, kind, r, extra = {}) {
       if (!this.body.p[name]) return;
-      this.decals.push({ ...this.body.anchor(name, x, y), kind, r, seed: Math.random() * 1000 });
+      this.decals.push({ ...this.body.anchor(name, x, y), kind, r, seed: Math.random() * 1000, ...extra });
       if (this.decals.length > 60) this.decals.shift();
     }
 
@@ -3408,7 +4200,8 @@ globalThis.BUFFET_FIREBASE = {
       if (m.down) {
         if (this.settings.weapon === 'mitraillette' && this.every('smg', 85 * this.m('rate'), now)) this.shoot('mitraillette', now);
         if (this.settings.weapon === 'flamme') this.flamethrower(now);
-        if (this.settings.weapon === 'katana') this.katana(now);
+        if (this.settings.weapon === 'katana' || this.settings.weapon === 'batte') this.swipe(now);
+        if (this.settings.weapon === 'minigun' && now - this.spinStart > 250 && this.every('mg', 45 * this.m('rate'), now)) this.shoot('minigun', now);
         if (this.settings.weapon === 'tronconneuse') this.chainsaw(now);
         if (this.settings.weapon === 'laser') this.laser(now);
       }
@@ -3444,6 +4237,7 @@ globalThis.BUFFET_FIREBASE = {
       if (this.ko && now > this.ko.until) this.respawn(now);
 
       this.recoil *= 0.75;
+      this.massSwing = Math.max(0, (this.massSwing || 0) - DT * 5);
       this.muzzle = Math.max(0, this.muzzle - DT * 14);
       this.shake = this.shake > 0.3 ? this.shake * 0.88 : 0;
       this.flash = Math.max(0, this.flash - DT * 3);
@@ -3461,6 +4255,20 @@ globalThis.BUFFET_FIREBASE = {
       const ctx = this.ctx, W = this.W, H = this.H, b = this.body;
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
+      const decor = this.decorId();
+      if (decor !== 'page') {
+        const key = `${decor}:${W}:${H}:${this.dpr}`;
+        if (this.decorKey !== key) {
+          this.decorKey = key;
+          this.decorCache = document.createElement('canvas');
+          this.decorCache.width = Math.round(W * this.dpr);
+          this.decorCache.height = Math.round(H * this.dpr);
+          const dc = this.decorCache.getContext('2d');
+          dc.scale(this.dpr, this.dpr);
+          D.paintDecor(dc, decor, W, H);
+        }
+        ctx.drawImage(this.decorCache, 0, 0, W, H);
+      }
       ctx.save();
       if (this.shake) ctx.translate(rand(-1, 1) * this.shake, rand(-1, 1) * this.shake);
 
@@ -3533,6 +4341,44 @@ globalThis.BUFFET_FIREBASE = {
         ctx.beginPath(); ctx.roundRect(-16, -5, 26, 10, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#dc2626';
         ctx.beginPath(); ctx.moveTo(10, -5); ctx.lineTo(21, 0); ctx.lineTo(10, 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (o.kind === 'carreau') {
+        ctx.rotate(Math.atan2(o.vy, o.vx));
+        ctx.strokeStyle = '#a16207';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-24, 0); ctx.lineTo(10, 0); ctx.stroke();
+        ctx.fillStyle = '#9ca3af';
+        ctx.beginPath(); ctx.moveTo(10, -4); ctx.lineTo(20, 0); ctx.lineTo(10, 4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(-24, 0); ctx.lineTo(-30, -6); ctx.lineTo(-18, 0); ctx.lineTo(-30, 6); ctx.closePath(); ctx.fill();
+      } else if (o.kind === 'plasma') {
+        this.disc(ctx, 0, 0, 16, 'rgba(163,230,53,.3)');
+        this.disc(ctx, 0, 0, 9, '#d9f99d');
+        this.disc(ctx, 0, 0, 4, '#ffffff');
+      } else if (o.kind === 'missile') {
+        ctx.rotate(o.ang);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = OUTLINE;
+        ctx.fillStyle = '#fb923c';
+        ctx.beginPath(); ctx.moveTo(-18, -4); ctx.lineTo(-32 - rand(0, 10), 0); ctx.lineTo(-18, 4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath(); ctx.roundRect(-18, -5, 30, 10, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.moveTo(12, -5); ctx.lineTo(23, 0); ctx.lineTo(12, 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-14, -5); ctx.lineTo(-20, -11); ctx.lineTo(-8, -5); ctx.moveTo(-14, 5); ctx.lineTo(-20, 11); ctx.lineTo(-8, 5); ctx.stroke();
+      } else if (o.kind === 'molotov') {
+        ctx.rotate(o.rot);
+        ctx.scale(0.8, 0.8);
+        D.drawWeapon(ctx, 'molotov');
+        this.disc(ctx, 0, -44, 6 + Math.random() * 3, '#f97316');
+        this.disc(ctx, 0, -44, 3, '#fde047');
+      } else if (o.kind === 'feu') {
+        ctx.fillStyle = 'rgba(28,25,23,.35)';
+        ctx.beginPath(); ctx.ellipse(0, 0, o.w / 2, 6, 0, 0, Math.PI * 2); ctx.fill();
+      } else if (o.kind === 'mine') {
+        ctx.scale(0.9, 0.9);
+        D.drawWeapon(ctx, 'mine');
+        if (now >= o.armed && Math.floor(now / 450) % 2) this.disc(ctx, 0, -6, 6, 'rgba(252,165,165,.9)');
       } else if (o.kind === 'obus') {
         ctx.rotate(o.rot);
         ctx.scale(0.5, 0.5);
@@ -3805,10 +4651,10 @@ globalThis.BUFFET_FIREBASE = {
         this.drawCrosshair(ctx, m.x, m.y);
         return;
       }
-      if (w === 'katana' || w === 'tronconneuse') {
+      if (w === 'katana' || w === 'tronconneuse' || w === 'batte' || w === 'masse') {
         // Le bout de la lame est sur le curseur.
         const box = D.WEAPON_BOX[w];
-        const ang = w === 'katana' ? this.bladeAng : -0.5;
+        const ang = w === 'katana' || w === 'batte' ? this.bladeAng : w === 'masse' ? -0.6 - 0.6 * (this.massSwing || 0) : -0.5;
         const jitter = w === 'tronconneuse' && m.down ? rand(-2, 2) : 0;
         ctx.save();
         ctx.translate(m.x + jitter, m.y + jitter);
