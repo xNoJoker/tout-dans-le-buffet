@@ -498,6 +498,7 @@ globalThis.BUFFET_FIREBASE = {
     volume: 0.6,
     customPhrases: [],
     weapon: 'pistolet',
+    recent: ['pistolet', 'main'],
     decor: 'auto',
   });
 
@@ -526,6 +527,26 @@ globalThis.BUFFET_FIREBASE = {
     { id: 'plasma', short: 'Plasma', label: 'Fusil à plasma' },
     { id: 'frappe', short: 'Frappe', label: 'Frappe aérienne' },
     { id: 'missile', short: 'Missile', label: 'Missile à tête chercheuse' },
+    { id: 'fronde', short: 'Fronde', label: 'Lance-pierres' },
+    { id: 'brique', short: 'Brique', label: 'Brique' },
+    { id: 'poele', short: 'Poêle', label: 'Poêle à frire (frapper d\'un geste)' },
+    { id: 'flechettes', short: 'Fléchettes', label: 'Fléchettes (3 d\'un coup)' },
+    { id: 'shuriken', short: 'Shuriken', label: 'Shurikens (3 d\'un coup)' },
+    { id: 'boomerang', short: 'Boomerang', label: 'Boomerang (il revient !)' },
+    { id: 'nunchaku', short: 'Nunchaku', label: 'Nunchaku (frapper d\'un geste)' },
+    { id: 'kunai', short: 'Kunaï', label: 'Kunaï' },
+    { id: 'bowling', short: 'Bowling', label: 'Boule de bowling' },
+    { id: 'fouet', short: 'Fouet', label: 'Fouet (frapper d\'un geste)' },
+    { id: 'hache', short: 'Hache', label: 'Hache de lancer' },
+    { id: 'cloueuse', short: 'Cloueuse', label: 'Cloueuse (maintenir le clic)' },
+    { id: 'arc', short: 'Arc', label: 'Arc' },
+    { id: 'javelot', short: 'Javelot', label: 'Javelot' },
+    { id: 'harpon', short: 'Harpon', label: 'Fusil-harpon (attire la cible)' },
+    { id: 'scie', short: 'Scie', label: 'Lame de scie (rebondit partout)' },
+    { id: 'c4', short: 'C4', label: 'Charge C4 (colle au corps)' },
+    { id: 'foudre', short: 'Foudre', label: 'Foudre' },
+    { id: 'meteorite', short: 'Météorite', label: 'Météorite' },
+    { id: 'trounoir', short: 'Trou noir', label: 'Trou noir' },
   ];
 
   D.HAIR_STYLES = [
@@ -569,6 +590,26 @@ globalThis.BUFFET_FIREBASE = {
     minigun: ['BRRRRRRT !', "C'est une moissonneuse, ce truc ?!"],
     plasma: ['Ça vient du futur, ça ?', 'Je fonds !'],
     missile: ['Il me suit !', 'Il fait demi-tour ?!'],
+    fronde: ['Un caillou ? Sérieux ?', 'Aïe, ça pique quand même !'],
+    brique: ['Une brique ?!', "C'est pour un mur, ça !"],
+    poele: ['BOING ! Ma tête !', "J'ai vu des crêpes voler…"],
+    flechettes: ['Je suis pas une cible !', 'Triple vingt ?!'],
+    shuriken: ['Un ninja ?!', 'Ça tourne, ça tourne… aïe !'],
+    boomerang: ['Il revient ?!', "Pas encore lui !"],
+    nunchaku: ['WATAAAA… aïe.', 'Bruce Lee, sors de ce corps !'],
+    kunai: ['Discret mais efficace…', 'Ninja de bureau !'],
+    bowling: ['STRIKE !', 'Je suis pas une quille !'],
+    fouet: ['CLAC ! Ça brûle !', "Indiana Jones, c'est toi ?"],
+    hache: ['Bûcheron du dimanche !', 'Pas la hache !'],
+    cloueuse: ['Clou… clou… clou…', 'Je suis pas une planche !'],
+    arc: ['Guillaume Tell ?!', 'Pile dans la pomme… euh, non.'],
+    javelot: ['Médaille d\'or pour toi.', 'Ça transperce !'],
+    harpon: ['Lâche-moi, je suis pas un thon !', 'Il me tire vers lui !'],
+    scie: ['Elle rebondit partout !', 'Arrêtez cette scie !'],
+    c4: ['Il y a un truc collé sur moi…', 'Ça clignote, c\'est normal ?'],
+    foudre: ['ZZZT ! J\'ai les cheveux qui frisent !', 'Encore un orage…'],
+    meteorite: ['Ça tombe du ciel !', 'Les dinosaures, c\'était toi ?'],
+    trounoir: ['Ça m\'aspire !', 'Je vois la lumière…'],
     wall: ['Le mur ! LE MUR !', 'Qui a mis ce mur là ?', "Aïe, le bord de l'écran !"],
     detach: ["C'est rien, juste une égratignure !", 'Mon bras !', 'Quelqu\'un a vu ma jambe ?', "J'en avais besoin, de ça !"],
     ko: ['Game over…', 'Dites à ma mère que je l\'aimais…', 'Je reviendrai…'],
@@ -638,7 +679,12 @@ globalThis.BUFFET_FIREBASE = {
     flamme: 8, dynamite: 9, masse: 10, tronconneuse: 11, arbalete: 12, roquette: 13, molotov: 14,
     lancegrenades: 15, sniper: 16, mine: 17, laser: 18, minigun: 19, plasma: 20,
     frappe: 22, missile: 24,
+    fronde: 3, brique: 5, poele: 7, flechettes: 8, shuriken: 9, boomerang: 11, nunchaku: 13, kunai: 14,
+    bowling: 15, fouet: 16, hache: 17, cloueuse: 18, arc: 20, javelot: 21, harpon: 23, scie: 26,
+    c4: 28, foudre: 30, meteorite: 33, trounoir: 36,
   };
+  // Les armes sont affichées dans l'ordre où on les débloque.
+  if (D.WEAPONS) D.WEAPONS.sort((a, b) => (D.UNLOCKS[a.id] || 1) - (D.UNLOCKS[b.id] || 1));
   D.MAX_LEVEL = 40;
 
   // Décors à débloquer. « page » laisse voir le site web derrière (extension uniquement).
@@ -1484,6 +1530,19 @@ globalThis.BUFFET_FIREBASE = {
         case 'soot':
           blob(ctx, x, y, d.r, d.seed, '#111827', 0.55, a);
           break;
+        case 'stuck': {
+          // Objet planté dans le corps (shuriken, kunaï, hache, flèche…), dessiné avec son art.
+          const box = D.WEAPON_BOX?.[d.art];
+          if (!box || !D.drawWeapon) break;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(a + (d.rot || 0));
+          ctx.scale(d.scale, d.scale);
+          ctx.translate(-(box.muzzle || 0) * 0.85, 0);
+          D.drawWeapon(ctx, d.art);
+          ctx.restore();
+          break;
+        }
         case 'bolt': {
           // Carreau d'arbalète planté : la tige ressort à l'opposé du sens du tir.
           ctx.save();
@@ -1576,6 +1635,30 @@ globalThis.BUFFET_FIREBASE = {
     molotov: { x: -14, y: -40, w: 28, h: 72 },
     mine: { x: -22, y: -14, w: 44, h: 26 },
     missile: { x: -72, y: -26, w: 160, h: 58, muzzle: 86 },
+    shuriken: { x: -16, y: -16, w: 32, h: 32, muzzle: 0 },
+    kunai: { x: -32, y: -8, w: 64, h: 16, muzzle: 30 },
+    hache: { x: -32, y: -18, w: 68, h: 28, muzzle: 30 },
+    javelot: { x: -62, y: -6, w: 122, h: 12, muzzle: 56 },
+    flechettes: { x: -20, y: -9, w: 44, h: 18, muzzle: 22 },
+    brique: { x: -18, y: -10, w: 36, h: 20, muzzle: 0 },
+    bowling: { x: -18, y: -18, w: 36, h: 36, muzzle: 0 },
+    boomerang: { x: -20, y: -14, w: 40, h: 28, muzzle: 0 },
+    scie: { x: -19, y: -19, w: 38, h: 38, muzzle: 0 },
+    fronde: { x: -32, y: -18, w: 50, h: 36, muzzle: 14 },
+    caillou: { x: -8, y: -7, w: 16, h: 14, muzzle: 0 },
+    cloueuse: { x: -30, y: -16, w: 70, h: 46, muzzle: 38 },
+    clou: { x: -10, y: -4, w: 20, h: 8, muzzle: 8 },
+    arc: { x: -6, y: -38, w: 52, h: 76, muzzle: 40 },
+    fleche: { x: -32, y: -6, w: 56, h: 12, muzzle: 22 },
+    harpon: { x: -42, y: -12, w: 112, h: 40, muzzle: 66 },
+    harponfleche: { x: -62, y: -8, w: 86, h: 16, muzzle: 22 },
+    c4: { x: -16, y: -11, w: 32, h: 22, muzzle: 0 },
+    trounoir: { x: -18, y: -18, w: 36, h: 36, muzzle: 0 },
+    poele: { x: -52, y: -20, w: 82, h: 40, muzzle: 8 },
+    nunchaku: { x: -42, y: -6, w: 68, h: 12, muzzle: 22 },
+    fouet: { x: -42, y: -22, w: 106, h: 32, muzzle: 60 },
+    foudre: { x: -12, y: -26, w: 24, h: 52, muzzle: 0 },
+    meteorite: { x: -36, y: -14, w: 50, h: 28, muzzle: 0 },
   };
 
   function shape(ctx, color, draw) {
@@ -1838,6 +1921,153 @@ globalThis.BUFFET_FIREBASE = {
       rect(ctx, '#0ea5e9', -14, -26, 24, 12, 3);
       poly(ctx, '#f8fafc', [78, -9, 92, -2, 78, 5]);
       rect(ctx, '#1e293b', 70, -16, 10, 28, 3);
+    },
+    shuriken(ctx) {
+      const pts = [];
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4, r = i % 2 ? 4 : 15;
+        pts.push(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      poly(ctx, '#9ca3af', pts);
+      shape(ctx, '#27272a', () => ctx.arc(0, 0, 3, 0, Math.PI * 2));
+    },
+    kunai(ctx) {
+      ctx.beginPath(); ctx.arc(-27, 0, 4, 0, Math.PI * 2); ctx.stroke();
+      rect(ctx, '#1f2937', -23, -2.5, 23, 5, 1);
+      poly(ctx, '#d1d5db', [0, -5, 30, 0, 0, 5]);
+    },
+    hache(ctx) {
+      rect(ctx, '#92400e', -30, -3, 52, 6, 2);
+      poly(ctx, '#9ca3af', [14, -4, 28, -16, 34, -14, 30, 7, 14, 4]);
+    },
+    javelot(ctx) {
+      rect(ctx, '#a16207', -60, -2, 100, 4, 1);
+      rect(ctx, '#1f2937', -10, -3, 14, 6, 1);
+      poly(ctx, '#9ca3af', [40, -4, 58, 0, 40, 4]);
+    },
+    flechettes(ctx) {
+      poly(ctx, '#ef4444', [-6, 0, -18, -7, -13, 0, -18, 7]);
+      rect(ctx, '#d4d4d8', -7, -3, 19, 6, 2);
+      ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(22, 0); ctx.stroke();
+    },
+    brique(ctx) {
+      rect(ctx, '#b91c1c', -16, -8, 32, 16, 2);
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(16, 0); ctx.moveTo(0, -8); ctx.lineTo(0, 0); ctx.moveTo(-8, 0); ctx.lineTo(-8, 8); ctx.moveTo(8, 0); ctx.lineTo(8, 8); ctx.stroke();
+    },
+    bowling(ctx) {
+      shape(ctx, '#1e3a8a', () => ctx.arc(0, 0, 16, 0, Math.PI * 2));
+      for (const [x, y] of [[-4, -6], [3, -7], [0, 0]]) shape(ctx, '#0f172a', () => ctx.arc(x, y, 2.5, 0, Math.PI * 2));
+    },
+    boomerang(ctx) {
+      poly(ctx, '#d97706', [-18, 8, -2, -12, 2, -12, 18, 8, 12, 12, 0, -2, -12, 12]);
+    },
+    scie(ctx) {
+      const pts = [];
+      for (let i = 0; i < 24; i++) {
+        const a = (i * Math.PI) / 12, r = i % 2 ? 14 : 18;
+        pts.push(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      poly(ctx, '#d1d5db', pts);
+      shape(ctx, '#71717a', () => ctx.arc(0, 0, 5, 0, Math.PI * 2));
+    },
+    fronde(ctx) {
+      rect(ctx, '#92400e', -30, -3, 28, 6, 2);
+      ctx.save();
+      ctx.lineWidth *= 2.2;
+      ctx.strokeStyle = '#92400e';
+      ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(14, -14); ctx.moveTo(-4, 0); ctx.lineTo(14, 14); ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = '#ef4444';
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(-2, 0); ctx.lineTo(14, 14); ctx.stroke();
+      ctx.restore();
+    },
+    caillou(ctx) {
+      shape(ctx, '#78716c', () => ctx.ellipse(0, 0, 7, 6, 0.4, 0, Math.PI * 2));
+    },
+    cloueuse(ctx) {
+      poly(ctx, '#27272a', [-22, 2, -10, 2, -6, 28, -20, 28]);
+      rect(ctx, '#52525b', -4, 4, 30, 6, 2);
+      rect(ctx, '#facc15', -28, -14, 50, 18, 4);
+      rect(ctx, '#27272a', 22, -9, 16, 8, 2);
+    },
+    clou(ctx) {
+      ctx.save(); ctx.strokeStyle = '#9ca3af'; ctx.lineWidth *= 1.2;
+      ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#6b7280', -10, -3, 3, 6, 1);
+    },
+    arc(ctx) {
+      ctx.save();
+      ctx.lineWidth *= 2.2;
+      ctx.strokeStyle = '#92400e';
+      ctx.beginPath(); ctx.moveTo(0, -36); ctx.quadraticCurveTo(24, 0, 0, 36); ctx.stroke();
+      ctx.restore();
+      ctx.save(); ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth *= 0.6;
+      ctx.beginPath(); ctx.moveTo(0, -36); ctx.lineTo(0, 36); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#a16207', 0, -1.5, 36, 3, 1);
+      poly(ctx, '#9ca3af', [34, -4, 42, 0, 34, 4]);
+      rect(ctx, '#1f2937', 8, -6, 8, 12, 2);
+    },
+    fleche(ctx) {
+      poly(ctx, '#ef4444', [-28, 0, -32, -5, -22, 0, -32, 5]);
+      rect(ctx, '#a16207', -28, -1.5, 42, 3, 1);
+      poly(ctx, '#9ca3af', [14, -4, 22, 0, 14, 4]);
+    },
+    harpon(ctx) {
+      poly(ctx, '#27272a', [-24, 6, -12, 6, -8, 28, -22, 28]);
+      rect(ctx, '#f59e0b', -38, 4, 24, 10, 5);
+      rect(ctx, '#0f766e', -40, -6, 70, 12, 4);
+      ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(56, 0); ctx.stroke();
+      poly(ctx, '#9ca3af', [56, -6, 68, 0, 56, 6]);
+    },
+    harponfleche(ctx) {
+      ctx.save(); ctx.strokeStyle = '#a8a29e'; ctx.lineWidth *= 0.6;
+      ctx.beginPath(); ctx.moveTo(-40, 0); ctx.quadraticCurveTo(-52, 6, -60, 2); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#64748b', -40, -1.5, 50, 3, 1);
+      poly(ctx, '#9ca3af', [10, -6, 22, 0, 10, 6, 13, 0]);
+    },
+    c4(ctx) {
+      rect(ctx, '#d6d3d1', -14, -9, 28, 18, 2);
+      rect(ctx, '#7f1d1d', -6, -6, 12, 7, 1);
+      ctx.save(); ctx.strokeStyle = '#ef4444';
+      ctx.beginPath(); ctx.moveTo(-14, 4); ctx.quadraticCurveTo(-20, 10, -12, 9); ctx.stroke();
+      ctx.restore();
+    },
+    trounoir(ctx) {
+      ctx.save(); ctx.strokeStyle = '#a855f7'; ctx.lineWidth *= 1.6;
+      ctx.beginPath(); ctx.ellipse(0, 0, 17, 7, -0.4, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+      shape(ctx, '#020617', () => ctx.arc(0, 0, 11, 0, Math.PI * 2));
+    },
+    poele(ctx) {
+      rect(ctx, '#27272a', -50, -3, 40, 6, 3);
+      shape(ctx, '#3f3f46', () => ctx.ellipse(8, 0, 20, 18, 0, 0, Math.PI * 2));
+      shape(ctx, '#52525b', () => ctx.ellipse(8, 0, 14, 12, 0, 0, Math.PI * 2));
+    },
+    nunchaku(ctx) {
+      rect(ctx, '#18181b', -40, -3, 24, 6, 2);
+      ctx.save(); ctx.setLineDash([2, 2]); ctx.strokeStyle = '#9ca3af';
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.quadraticCurveTo(-8, 6, 0, 0); ctx.stroke();
+      ctx.restore();
+      rect(ctx, '#18181b', 0, -3, 24, 6, 2);
+    },
+    fouet(ctx) {
+      rect(ctx, '#7c2d12', -40, -3, 18, 6, 2);
+      ctx.save(); ctx.strokeStyle = '#92400e'; ctx.lineWidth *= 1.3;
+      ctx.beginPath(); ctx.moveTo(-22, 0); ctx.quadraticCurveTo(10, -22, 60, 6); ctx.stroke();
+      ctx.restore();
+    },
+    foudre(ctx) {
+      poly(ctx, '#fde047', [-4, -24, 8, -24, 0, -4, 10, -4, -8, 24, -2, 2, -10, 2]);
+    },
+    meteorite(ctx) {
+      poly(ctx, '#f97316', [-6, -10, -34, 0, -6, 10]);
+      shape(ctx, '#57534e', () => ctx.arc(0, 0, 12, 0, Math.PI * 2));
+      shape(ctx, '#44403c', () => ctx.arc(-3, -3, 3, 0, Math.PI * 2));
+      shape(ctx, '#44403c', () => ctx.arc(4, 4, 2, 0, Math.PI * 2));
     },
   };
 
@@ -2435,6 +2665,24 @@ globalThis.BUFFET_FIREBASE = {
       this.noise({ dur: 0.2, gain: 0.4, type: 'highpass', f0: 3000 });
     }
 
+    toss() {
+      this.noise({ dur: 0.18, gain: 0.3, type: 'bandpass', f0: 600, f1: 2000, q: 1.5 });
+    }
+
+    pan() {
+      this.tone({ type: 'triangle', f0: 420, f1: 380, dur: 0.6, gain: 0.3, vibrato: 7 });
+      this.noise({ dur: 0.05, gain: 0.5, f0: 3000, f1: 800 });
+    }
+
+    crack() {
+      this.noise({ dur: 0.06, gain: 1, type: 'highpass', f0: 2500 });
+    }
+
+    thunder() {
+      this.noise({ dur: 0.08, gain: 1, type: 'highpass', f0: 2000 });
+      this.noise({ dur: 1.6, gain: 0.9, f0: 500, f1: 40 });
+    }
+
     beep() {
       this.tone({ type: 'square', f0: 2200, dur: 0.05, gain: 0.05 });
     }
@@ -2563,9 +2811,9 @@ globalThis.BUFFET_FIREBASE = {
   const EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
   const GUN_SCALE = 1.1;
   // Armes tenues en bas à droite de l'écran, qui visent le curseur.
-  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme', 'lancegrenades', 'laser', 'revolver', 'sniper', 'arbalete', 'minigun', 'plasma', 'missile']);
-  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5, lancegrenades: -3, laser: -2, revolver: -7, sniper: -4, arbalete: 0, minigun: -1, plasma: -1, missile: -2 };
-  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0, lancegrenades: 12, laser: 0, revolver: 16, sniper: 22, arbalete: 6, minigun: 3, plasma: 8, missile: 14 };
+  const FIREARMS = new Set(['pistolet', 'mitraillette', 'pompe', 'roquette', 'flamme', 'lancegrenades', 'laser', 'revolver', 'sniper', 'arbalete', 'minigun', 'plasma', 'missile', 'fronde', 'cloueuse', 'arc', 'harpon']);
+  const MUZZLE_Y = { pistolet: -6, mitraillette: -4, pompe: -8, roquette: -1, flamme: -5, lancegrenades: -3, laser: -2, revolver: -7, sniper: -4, arbalete: 0, minigun: -1, plasma: -1, missile: -2, fronde: 0, cloueuse: -5, arc: 0, harpon: 0 };
+  const RECOIL = { pistolet: 10, mitraillette: 6, pompe: 18, roquette: 14, flamme: 0, lancegrenades: 12, laser: 0, revolver: 16, sniper: 22, arbalete: 6, minigun: 3, plasma: 8, missile: 14, fronde: 4, cloueuse: 3, arc: 4, harpon: 10 };
   const HP_MAX = { head: 90, torso: 160, lArm: 55, rArm: 55, lLeg: 70, rLeg: 70 };
   const BLAST = {
     grenade: { power: 2600, radius: 300, dmg: 110, label: 'BOUM !' },
@@ -2575,6 +2823,9 @@ globalThis.BUFFET_FIREBASE = {
     mine: { power: 3600, radius: 240, dmg: 170, label: 'BOUM !' },
     plasma: { power: 1800, radius: 140, dmg: 55, label: 'ZAP !' },
     missile: { power: 3200, radius: 300, dmg: 180, label: 'KABOOM !' },
+    c4: { power: 3400, radius: 280, dmg: 190, label: 'BOUM !' },
+    trounoir: { power: 4200, radius: 340, dmg: 150, label: 'IMPLOSION !' },
+    meteorite: { power: 4000, radius: 330, dmg: 200, label: 'CRATÈRE !' },
     frappe: { power: 3000, radius: 260, dmg: 120, label: 'BOOOM !' },
   };
   // Expérience gagnée par coup, selon l'arme (multipliée par le combo en cours).
@@ -2582,11 +2833,37 @@ globalThis.BUFFET_FIREBASE = {
     pistolet: 6, mitraillette: 3, pompe: 8, grenade: 14, katana: 7, flamme: 2, dynamite: 16,
     tronconneuse: 3, roquette: 16, lancegrenades: 10, laser: 2, frappe: 12, wall: 5,
     batte: 6, revolver: 10, masse: 12, arbalete: 10, molotov: 3, sniper: 18, mine: 18, minigun: 2, plasma: 12, missile: 18,
+    fronde: 5, brique: 6, poele: 6, flechettes: 4, shuriken: 4, boomerang: 7, nunchaku: 4, kunai: 8, bowling: 10,
+    fouet: 6, hache: 12, cloueuse: 2, arc: 10, javelot: 14, harpon: 12, scie: 4, c4: 20, foudre: 16, meteorite: 22, trounoir: 24,
   };
   // Armes de mêlée maniées d'un geste (katana et batte).
   const SWIPE = {
     katana: { dmg: 34, force: 500, decal: 'blood', words: ['TCHAK!', 'SLASH!'], color: '#e5e7eb' },
-    batte: { dmg: 22, force: 1300, decal: 'bruise', words: ['BONK!', 'POC!'], color: '#fb923c' },
+    batte: { dmg: 22, force: 1300, decal: 'bruise', words: ['BONK!', 'POC!'], color: '#fb923c', heavy: true, blood: 4, knock: 1100 },
+    poele: { dmg: 20, force: 1100, decal: 'bruise', words: ['BOING!', 'PAF!'], color: '#d1d5db', heavy: true, blood: 2, knock: 1000, sound: 'pan' },
+    nunchaku: { dmg: 12, force: 700, decal: 'bruise', words: ['WATAAA!', 'TCHAK!'], color: '#fde047', blood: 2, throttle: 90, sound: 'crack' },
+    fouet: { dmg: 16, force: 900, decal: 'blood', words: ['CLAC!'], color: '#fca5a5', blood: 5, pad: 26, sound: 'crack' },
+  };
+
+  // Projectiles lancés à la main (depuis le bas de l'écran) ou tirés par l'arme tenue.
+  // speed : vitesse (px/s) · g : gravité · stick : reste planté · bounce : rebondit
+  // returns : revient (boomerang) · walls : rebondit sur les bords · rehit : peut retoucher (ms)
+  const PROJ = {
+    fronde: { origin: 'gun', speed: 1400, g: 900, spin: 10, bounce: 0.3, dmg: 20, force: 800, cd: 350, size: 0.9, art: 'caillou', words: ['PAF!'], life: 2 },
+    brique: { origin: 'hand', speed: 1000, g: 1600, spin: 8, bounce: 0.4, dmg: 25, force: 900, cd: 400, size: 0.9, words: ['POC!', 'BONK!'], life: 3 },
+    flechettes: { origin: 'hand', speed: 1400, g: 300, count: 3, spread: 0.04, stick: true, dmg: 10, force: 150, cd: 300, size: 0.6, words: ['TOC!'] },
+    shuriken: { origin: 'hand', speed: 1500, spin: 24, count: 3, spread: 0.06, stick: true, dmg: 14, force: 350, cd: 350, size: 0.6, words: ['TCHAK!'] },
+    boomerang: { origin: 'hand', speed: 1300, spin: 20, returns: true, dmg: 22, force: 700, cd: 900, size: 0.9, words: ['WHAP!'], rehit: 300, life: 3.5 },
+    kunai: { origin: 'hand', speed: 1800, stick: true, dmg: 30, force: 500, cd: 450, size: 0.7, words: ['TCHAK!'] },
+    bowling: { origin: 'hand', speed: 900, g: 1800, spin: 6, bounce: 0.25, roll: true, dmg: 40, force: 2000, cd: 900, size: 1, words: ['STRIKE!'], rehit: 400, life: 4, hitSound: 'smash' },
+    hache: { origin: 'hand', speed: 1100, g: 900, spin: 14, stick: true, dmg: 55, force: 900, cd: 800, size: 0.8, words: ['TCHONK!'], blood: 9 },
+    cloueuse: { origin: 'gun', speed: 2200, stick: true, dmg: 8, force: 150, cd: 90, hold: true, spread: 0.03, size: 0.6, art: 'clou', sound: 'tick', blood: 2 },
+    arc: { origin: 'gun', speed: 1500, g: 500, stick: true, dmg: 40, force: 600, cd: 700, size: 0.8, art: 'fleche', words: ['TCHOK!'], sound: 'bow' },
+    javelot: { origin: 'hand', speed: 950, g: 700, stick: true, dmg: 70, force: 1600, cd: 1200, size: 0.9, words: ['SHTONK!'], blood: 12 },
+    harpon: { origin: 'gun', speed: 1500, stick: true, dmg: 35, force: 0, cd: 1200, size: 0.8, art: 'harponfleche', words: ['HARPONNÉ!'], sound: 'bow' },
+    scie: { origin: 'hand', speed: 1100, spin: 30, walls: true, dmg: 12, force: 300, cd: 1000, size: 0.9, words: ['ZZING!'], rehit: 150, life: 3.5, blood: 4, decal: 'blood', hitSound: 'slash' },
+    c4: { origin: 'hand', speed: 1000, g: 1200, spin: 4, stickBomb: true, dmg: 0, force: 0, cd: 800, size: 0.8, life: 2.5, explosive: true },
+    trounoir: { origin: 'hand', speed: 900, blackhole: true, dmg: 0, force: 0, cd: 5000, size: 1, explosive: true },
   };
   const IS_WEB = (() => { try { return chrome.runtime.id === 'web'; } catch { return false; } })();
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -2701,6 +2978,12 @@ globalThis.BUFFET_FIREBASE = {
     .decor.on { border-color: #dc2626; }
     .decor.locked { opacity: .45; cursor: not-allowed; }
     .decor:focus-visible { outline: 2px solid #fca5a5; }
+    .quick { display: contents; }
+    .bar button.arsenal-btn { display: flex; gap: 6px; padding: 0 12px; font: 800 13px/1 system-ui, sans-serif; }
+    .pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .decor.pick { justify-items: center; padding: 10px 4px 8px; }
+    .decor.pick canvas { width: auto !important; }
+    @media (max-width: 720px) { .arsenal-txt { display: none; } }
 
     /* Notifications */
     .toast {
@@ -2822,15 +3105,11 @@ globalThis.BUFFET_FIREBASE = {
       xpbar.append(this.xpFill);
       lvl.append(this.lvlText, xpbar);
       this.bar.append(lvl);
-      this.weaponButtons = {};
-      for (const w of D.WEAPONS) {
-        const b = el('button', { type: 'button', title: w.label, 'aria-label': w.label, 'data-w': w.id });
-        b.append(D.weaponIconCanvas(w.id, w.id === 'main' ? 24 : 36, 24, true));
-        const lock = el('span', { class: 'lock', hidden: '' });
-        b.append(lock);
-        this.weaponButtons[w.id] = b;
-        this.bar.append(b);
-      }
+      // Les 6 dernières armes utilisées, puis le bouton qui ouvre tout l'arsenal.
+      this.quick = el('span', { class: 'quick' });
+      const arsenal = el('button', { type: 'button', class: 'arsenal-btn', title: 'Toutes les armes', 'aria-label': 'Ouvrir l\'arsenal', 'data-a': 'arsenal' });
+      arsenal.append(el('span', {}, '🧰'), el('span', { class: 'arsenal-txt' }, 'Arsenal'));
+      this.bar.append(this.quick, arsenal);
       this.bar.append(el('span', { class: 'sep' }));
       this.bar.append(el('button', { type: 'button', title: 'Nouveau personnage', 'aria-label': 'Nouveau personnage', 'data-a': 'respawn' }, '🩹'));
       const count = el('span', { class: 'count', title: 'Coups portés pendant cette session' }, '💥 ');
@@ -2879,9 +3158,23 @@ globalThis.BUFFET_FIREBASE = {
         if (btn?.dataset.decor) this.chooseDecor(btn.dataset.decor);
       });
 
+      this.pickEl = el('div', { class: 'up', hidden: '', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Arsenal' });
+      const pbox = el('div', { class: 'up-box' });
+      const phead = el('div', { class: 'up-head' });
+      this.pickCount = el('span', { class: 'up-pts' });
+      phead.append(el('h2', {}, 'Arsenal'), this.pickCount, el('button', { type: 'button', class: 'up-close', 'aria-label': 'Fermer', 'data-a': 'pick-close' }, '✕'));
+      this.pickGrid = el('div', { class: 'pick-grid' });
+      pbox.append(phead, el('p', { class: 'up-info' }, 'Choisis ton arme. Les armes verrouillées se débloquent en gagnant des niveaux.'), this.pickGrid);
+      this.pickEl.append(pbox);
+      this.pickEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (e.target === this.pickEl || btn?.dataset.a === 'pick-close') { this.pickEl.hidden = true; return; }
+        if (btn?.dataset.pick) this.pickWeapon(btn.dataset.pick);
+      });
+
       this.toastEl = el('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
 
-      root.append(style, this.canvas, this.questsEl, this.bar, this.hintEl, this.toastEl, this.upEl);
+      root.append(style, this.canvas, this.questsEl, this.bar, this.hintEl, this.toastEl, this.upEl, this.pickEl);
       document.documentElement.append(this.host);
 
       this.bar.addEventListener('click', (e) => this.onBar(e));
@@ -2896,7 +3189,8 @@ globalThis.BUFFET_FIREBASE = {
         if (e.key !== 'Escape') return;
         e.preventDefault();
         e.stopPropagation();
-        if (!this.upEl.hidden) this.closeUpgrades();
+        if (!this.pickEl.hidden) this.pickEl.hidden = true;
+        else if (!this.upEl.hidden) this.closeUpgrades();
         else this.hide();
       };
       this.onResize = () => this.resize();
@@ -2914,6 +3208,7 @@ globalThis.BUFFET_FIREBASE = {
         }
         this.setWeapon(w.id, true);
       } else if (b.dataset.a === 'levels') this.openUpgrades();
+      else if (b.dataset.a === 'arsenal') this.openPicker();
       else if (b.dataset.a === 'respawn') this.respawn(performance.now());
       else if (b.dataset.a === 'close') this.hide();
       else if (b.dataset.a === 'options') {
@@ -2924,13 +3219,59 @@ globalThis.BUFFET_FIREBASE = {
     setWeapon(id, persist) {
       if (!D.WEAPONS.some((w) => w.id === id) || !D.isUnlocked(this.progress, id)) id = D.DEFAULTS.weapon;
       this.settings.weapon = id;
-      for (const [wid, btn] of Object.entries(this.weaponButtons)) {
-        btn.classList.toggle('on', wid === id);
-        btn.setAttribute('aria-pressed', String(wid === id));
-      }
+      const recent = Array.isArray(this.settings.recent) ? this.settings.recent : [];
+      this.settings.recent = [id, ...recent.filter((r) => r !== id)].slice(0, 6);
+      this.renderQuick();
       this.canvas.style.cursor = id === 'main' ? 'grab' : 'none';
       this.stopLoops();
-      if (persist) D.saveSettings({ weapon: id }).catch(() => {});
+      if (persist) D.saveSettings({ weapon: id, recent: this.settings.recent }).catch(() => {});
+    }
+
+    renderQuick() {
+      if (!this.quick) return;
+      const ids = (this.settings.recent || []).filter((id) => D.WEAPONS.some((w) => w.id === id) && D.isUnlocked(this.progress, id));
+      if (!ids.includes(this.settings.weapon)) ids.unshift(this.settings.weapon);
+      const key = ids.slice(0, 6).join(',') + '|' + this.settings.weapon;
+      if (this.quickKey === key) return;
+      this.quickKey = key;
+      this.quick.replaceChildren();
+      for (const id of ids.slice(0, 6)) {
+        const w = D.WEAPONS.find((x) => x.id === id);
+        const b = el('button', { type: 'button', title: w.label, 'aria-label': w.label, 'data-w': id, 'aria-pressed': String(id === this.settings.weapon) });
+        if (id === this.settings.weapon) b.classList.add('on');
+        b.append(D.weaponIconCanvas(id, id === 'main' ? 24 : 36, 24, true));
+        this.quick.append(b);
+      }
+    }
+
+    openPicker() {
+      this.renderPicker();
+      this.pickEl.hidden = false;
+      this.pickEl.querySelector('.up-close').focus();
+    }
+
+    renderPicker() {
+      const total = D.WEAPONS.length;
+      const owned = D.WEAPONS.filter((w) => D.isUnlocked(this.progress, w.id)).length;
+      this.pickCount.textContent = `${owned} / ${total}`;
+      this.pickGrid.replaceChildren();
+      for (const w of D.WEAPONS) {
+        const locked = !D.isUnlocked(this.progress, w.id);
+        const b = el('button', { type: 'button', class: `decor pick${w.id === this.settings.weapon ? ' on' : ''}${locked ? ' locked' : ''}`, 'data-pick': w.id, title: w.label });
+        b.append(D.weaponIconCanvas(w.id, w.id === 'main' ? 30 : 64, 30, true), el('span', {}, locked ? `🔒 niv. ${D.UNLOCKS[w.id]}` : w.short));
+        this.pickGrid.append(b);
+      }
+    }
+
+    pickWeapon(id) {
+      const w = D.WEAPONS.find((x) => x.id === id);
+      if (!D.isUnlocked(this.progress, id)) {
+        this.sfx.denied();
+        this.toast(`🔒 ${w.short} : débloqué au niveau ${D.UNLOCKS[id]}`);
+        return;
+      }
+      this.setWeapon(id, true);
+      this.pickEl.hidden = true;
     }
 
     stopLoops() {
@@ -2959,19 +3300,9 @@ globalThis.BUFFET_FIREBASE = {
       this.lvlText.parentElement.title = info.need
         ? `Niveau ${info.level} : ${info.into} / ${info.need} XP. Clique pour les améliorations.`
         : `Niveau maximum. Clique pour les améliorations.`;
-      const level = D.levelInfo(this.progress.xp).level;
-      const nextLevel = Math.min(...D.WEAPONS.map((w) => D.UNLOCKS[w.id]).filter((l) => l > level), Infinity);
-      for (const w of D.WEAPONS) {
-        const btn = this.weaponButtons[w.id];
-        const locked = !D.isUnlocked(this.progress, w.id);
-        btn.hidden = locked && D.UNLOCKS[w.id] > nextLevel;
-        btn.classList.toggle('locked', locked);
-        const lock = btn.querySelector('.lock');
-        lock.hidden = !locked;
-        lock.textContent = `🔒${D.UNLOCKS[w.id]}`;
-        btn.title = locked ? `${w.label} · débloqué au niveau ${D.UNLOCKS[w.id]}` : w.label;
-      }
+      this.renderQuick();
       if (!this.upEl.hidden) this.renderUpgrades();
+      if (!this.pickEl.hidden) this.renderPicker();
     }
 
     gainXp(amount, now) {
@@ -3299,7 +3630,16 @@ globalThis.BUFFET_FIREBASE = {
       this.mouse.down = true;
       const { x, y } = this.mouse;
       const b = this.body;
-      switch (this.settings.weapon) {
+      const wid = this.settings.weapon;
+      if (PROJ[wid]) {
+        if (this.every('shot', PROJ[wid].cd * this.m('rate'), now)) this.throwProj(wid, x, y);
+        else if (PROJ[wid].cd >= 1500) this.sfx.denied();
+        return;
+      }
+      if (SWIPE[wid]) { this.blade = { x, y }; return; }
+      switch (wid) {
+        case 'foudre': if (this.every('shot', 2500 * this.m('rate'), now)) this.lightning(x, now); else this.sfx.denied(); break;
+        case 'meteorite': if (this.every('shot', 3000 * this.m('rate'), now)) this.meteor(x); else this.sfx.denied(); break;
         case 'main': {
           const hit = b.hitTest(x, y, 12 * b.s);
           if (hit) {
@@ -3318,7 +3658,6 @@ globalThis.BUFFET_FIREBASE = {
         case 'dynamite': this.placeDynamite(x, y, now); break;
         case 'frappe': if (this.every('shot', 3500 * this.m('rate'), now)) this.airStrike(x, now); else this.sfx.denied(); break;
         case 'flamme': this.sfx.loopStart('flame', { freq: 700, gain: 0.3 }); break;
-        case 'katana': case 'batte': this.blade = { x, y }; break;
         case 'revolver': if (this.every('shot', 450 * this.m('rate'), now)) this.shoot('revolver', now); break;
         case 'sniper': if (this.every('shot', 1300 * this.m('rate'), now)) this.shoot('sniper', now); else this.sfx.denied(); break;
         case 'minigun': this.spinStart = now; this.sfx.hum('minigun', { type: 'sawtooth', freq: 55, lfo: 40, depth: 20, gain: 0.08, lp: 900 }); break;
@@ -3472,7 +3811,7 @@ globalThis.BUFFET_FIREBASE = {
       }
     }
 
-    // Katana et batte : un geste rapide à travers le corps frappe tout ce qu'il croise.
+    // Mêlée par geste (katana, batte, poêle, nunchaku, fouet) : frappe tout ce que le geste croise.
     swipe(now) {
       const kind = this.settings.weapon, cfg = SWIPE[kind];
       const m = this.mouse, b = this.body;
@@ -3488,27 +3827,200 @@ globalThis.BUFFET_FIREBASE = {
       const steps = Math.ceil(len / 8);
       for (let i = 0; i <= steps; i++) {
         const x = prev.x + (dx * i) / steps, y = prev.y + (dy * i) / steps;
-        const hit = b.hitTest(x, y, 2 * b.s);
+        const hit = b.hitTest(x, y, (cfg.pad || 2) * b.s);
         if (hit && !parts.has(b.partOf(hit.name))) parts.set(b.partOf(hit.name), { ...hit, x, y });
       }
       if (this.every('katSnd', 110, now)) this.sfx.slash();
       let any = false;
       for (const [part, hit] of parts) {
-        if (!this.every(`kat-${part}`, 200 * this.m('rate'), now)) continue;
+        if (!this.every(`kat-${part}`, (cfg.throttle || 200) * this.m('rate'), now)) continue;
         any = true;
         const f = cfg.force * this.m('power');
         b.impulse(hit.x, hit.y, ux * f, uy * f - 150, 50 * b.s);
-        this.wound(hit.name, hit.x, hit.y, ux, uy, kind === 'batte' ? 4 : 9, cfg.decal);
+        this.wound(hit.name, hit.x, hit.y, ux, uy, cfg.blood ?? 9, cfg.decal);
         if (hit.name === 'head') { this.questEvent('head'); this.gainXp(4, now); }
         this.damage(part, cfg.dmg * this.m('dmg'), now);
       }
       if (any) {
-        b.knock(now, kind === 'batte' ? 1100 : 600);
-        if (kind === 'batte') { this.sfx.impact(1); this.shake = Math.max(this.shake, 6); }
+        b.knock(now, cfg.knock || 600);
+        if (cfg.sound) this.sfx[cfg.sound]();
+        if (cfg.heavy) { this.sfx.impact(1); this.shake = Math.max(this.shake, 6); }
         const homeRun = kind === 'batte' && len > 60;
         this.text(m.x, m.y - 30, homeRun ? 'HOME RUN!' : D.pick(cfg.words), cfg.color, homeRun ? 54 : 40);
         this.registerHit(kind, now);
       }
+    }
+
+    // ---------- Projectiles (moteur commun aux armes lancées) ----------
+
+    throwProj(w, tx, ty) {
+      const cfg = PROJ[w];
+      let sx, sy;
+      if (cfg.origin === 'gun') {
+        const g = this.gun();
+        sx = g.nx;
+        sy = g.ny;
+        this.recoil = RECOIL[w] || 4;
+      } else {
+        sx = clamp(tx + rand(-160, 160), 20, this.W - 20);
+        sy = this.H + 20;
+      }
+      const n = cfg.count || 1;
+      for (let i = 0; i < n; i++) {
+        const spread = (cfg.spread || 0) * 300;
+        const ax = tx + (n > 1 ? (i - (n - 1) / 2) * 28 : 0) + rand(-spread, spread);
+        const ay = ty + rand(-spread, spread);
+        const T = (Math.hypot(ax - sx, ay - sy) || 1) / cfg.speed;
+        const g = cfg.g || 0;
+        // Vitesse calculée pour arriver pile sur la cible malgré la gravité.
+        this.objects.push({
+          kind: 'proj', w, x: sx, y: sy, sx, sy, vx: (ax - sx) / T, vy: (ay - sy) / T - 0.5 * g * T,
+          T, t: 0, rot: rand(0, 6), life: cfg.life || 2.5, id: Math.random(), hits: 0,
+        });
+      }
+      if (cfg.sound) this.sfx[cfg.sound](); else this.sfx.toss();
+      D.track(cfg.explosive ? 'explosives' : 'shots', n);
+    }
+
+    updateProj(o, i, now) {
+      const cfg = PROJ[o.w], b = this.body;
+      const remove = () => this.objects.splice(i, 1);
+      o.t += DT;
+      o.life -= DT;
+      if (cfg.returns && o.t > o.T) {
+        // Le boomerang fait demi-tour vers le point de lancer.
+        const dx = o.sx - o.x, dy = o.sy - o.y, d = Math.hypot(dx, dy) || 1;
+        o.vx += (dx / d) * 2600 * DT;
+        o.vy += (dy / d) * 2600 * DT;
+        const sp = Math.hypot(o.vx, o.vy);
+        if (sp > 1400) { o.vx *= 1400 / sp; o.vy *= 1400 / sp; }
+      } else {
+        o.vy += (cfg.g || 0) * DT;
+      }
+      if (cfg.blackhole && o.t >= o.T) {
+        remove();
+        this.objects.push({ kind: 'trou', x: o.x, y: Math.min(o.y, this.H - 60), until: now + 2600 });
+        this.sfx.zap();
+        this.say(D.pick(D.PHRASES.trounoir), true);
+        return;
+      }
+      o.rot += (cfg.spin || 0) * DT;
+      let hit = null;
+      for (let k = 0; k < 3 && !hit; k++) {
+        o.x += (o.vx * DT) / 3;
+        o.y += (o.vy * DT) / 3;
+        hit = b.hitTest(o.x, o.y, 4 * b.s);
+      }
+      if (hit && !cfg.blackhole) {
+        const may = cfg.rehit ? this.every(`p${o.id}`, cfg.rehit, now) : !o.hits;
+        if (may) {
+          this.projHit(o, cfg, hit, now);
+          if (o.dead) { remove(); return; }
+        }
+      }
+      const r = 10 * (cfg.size || 0.6);
+      // Les objets lancés partent d'en bas de l'écran : le sol ne compte qu'à la descente.
+      if (o.y > this.H - r && o.vy > 0 && o.t > 0.1) {
+        if (cfg.bounce || cfg.walls) {
+          o.y = this.H - r;
+          o.vy = -Math.abs(o.vy) * (cfg.bounce || 0.9);
+          o.vx *= cfg.roll ? 0.995 : 0.8;
+          if (Math.abs(o.vy) < 40) o.vy = 0;
+        } else if (cfg.stickBomb) {
+          o.y = this.H - r;
+          o.vx = o.vy = 0;
+        } else if (!cfg.returns) {
+          remove();
+          return;
+        }
+      }
+      if (cfg.walls) {
+        if (o.x < r || o.x > this.W - r) { o.vx = -o.vx; o.x = clamp(o.x, r, this.W - r); }
+        if (o.y < r) o.vy = Math.abs(o.vy);
+      }
+      if (cfg.returns && o.t > o.T && o.y > this.H + 20) { remove(); return; }
+      const out = !cfg.walls && (o.x < -120 || o.x > this.W + 120 || o.y < -900 || o.y > this.H + 200);
+      if (out || o.life <= 0) {
+        remove();
+        if (cfg.stickBomb) this.explode(clamp(o.x, 0, this.W), clamp(o.y, 0, this.H - 4), 'c4', now);
+      }
+    }
+
+    projHit(o, cfg, hit, now) {
+      const b = this.body, w = o.w;
+      const sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
+      o.hits++;
+      if (cfg.stickBomb) {
+        this.objects.push({ kind: 'c4att', anchor: b.anchor(hit.name, o.x, o.y), at: now + 2000, beep: 0 });
+        this.text(o.x, o.y - 20, 'CLIC!', '#e5e7eb', 36);
+        this.sfx.tick();
+        this.say(D.pick(D.PHRASES.c4), true);
+        o.dead = true;
+        return;
+      }
+      const p = this.m('power', w);
+      let fx = ux * cfg.force * p, fy = (uy * cfg.force - cfg.force * 0.15) * p;
+      if (w === 'harpon') {
+        // Le harpon attire le personnage vers l'arme.
+        const g = this.gun(), dx = g.x - o.x, dy = g.y - o.y, d = Math.hypot(dx, dy) || 1;
+        fx = (dx / d) * 1800 * p;
+        fy = (dy / d) * 1800 * p - 400;
+        this.harpoon = { name: hit.name, until: now + 900 };
+      }
+      b.impulse(o.x, o.y, fx, fy, 60 * b.s);
+      b.knock(now, cfg.knock || 800);
+      const head = hit.name === 'head';
+      if (cfg.stick) {
+        this.addDecal(hit.name, o.x, o.y, 'stuck', 0, { art: cfg.art || w, rot: Math.atan2(uy, ux) - b.angleOf(hit.name), scale: (cfg.size || 0.6) * b.s });
+        this.bleed(o.x, o.y, -ux, -uy, cfg.blood ?? 5);
+        o.dead = true;
+      } else {
+        this.wound(hit.name, o.x, o.y, ux, uy, cfg.blood ?? 3, cfg.decal || 'bruise');
+        if (cfg.bounce) { o.vx = -o.vx * 0.4; o.vy = -Math.abs(o.vy) * 0.4; }
+      }
+      if (head) { this.questEvent('head'); this.gainXp(4, now); }
+      this.damage(b.partOf(hit.name), cfg.dmg * this.m('dmg', w) * (head ? 1.6 : 1), now);
+      if (cfg.words?.length) this.text(o.x, o.y - 30, D.pick(cfg.words), '#facc15', 40);
+      this.sfx[cfg.hitSound || 'impact'](0.6);
+      this.registerHit(w, now);
+    }
+
+    // Foudre : frappe le point le plus haut du personnage s'il est sous le curseur.
+    lightning(x, now) {
+      const b = this.body, c = b.center();
+      let tx = x, ty = this.H - 4, name = null;
+      if (Math.abs(c.x - x) < 90 * b.s) {
+        name = 'head';
+        for (const n of Object.keys(b.p)) if (b.p[n].y < b.p[name].y) name = n;
+        tx = b.p[name].x;
+        ty = b.p[name].y;
+      }
+      this.bolt = { x1: tx + rand(-80, 80), x2: tx, y2: ty, until: now + 260, seed: Math.random() * 1000 };
+      this.flash = 0.9;
+      this.shake = Math.max(this.shake, 14);
+      this.sfx.thunder();
+      D.track('explosives');
+      for (let i = 0; i < 16; i++) this.spawn({ type: 'spark', x: tx, y: ty, vx: rand(-500, 500), vy: rand(-600, -50), life: 0.4, max: 0.4 });
+      if (!name) return;
+      this.shockUntil = now + 1300;
+      this.burnUntil = Math.max(this.burnUntil, now + 1000);
+      for (let i = 0; i < 3; i++) {
+        const n = D.pick(Object.keys(b.p)), p = b.p[n];
+        this.addDecal(n, p.x, p.y, 'soot', rand(10, 16) * b.s);
+      }
+      this.text(tx, ty - 40, 'ZZZAP!', '#fde047', 60);
+      this.damage(b.partOf(name), 60 * this.m('dmg'), now);
+      this.registerHit('foudre', now);
+      this.setMood('dizzy', 1600, now);
+    }
+
+    // Météorite : tombe en diagonale du ciel sur le point visé.
+    meteor(x) {
+      const sx = x - 420, sy = -140, T = 0.9;
+      this.objects.push({ kind: 'meteor', x: sx, y: sy, vx: (x - sx) / T, vy: (this.H - 10 - sy) / T });
+      this.sfx.whistle();
+      D.track('explosives');
+      this.say(D.pick(D.PHRASES.meteorite), true);
     }
 
     // Tronçonneuse : dégâts continus là où la lame touche.
@@ -3791,6 +4303,37 @@ globalThis.BUFFET_FIREBASE = {
           if (o.t >= 1 || b.hitTest(o.x, o.y, 4 * b.s)) {
             this.objects.splice(i, 1);
             this.explode(o.x, clamp(o.y, 0, this.H - 4), 'lancegrenades', now);
+          }
+          continue;
+        }
+        if (o.kind === 'proj') { this.updateProj(o, i, now); continue; }
+        if (o.kind === 'c4att') {
+          if (!b.p[o.anchor.name]) { this.objects.splice(i, 1); continue; }
+          const pos = b.place(o.anchor);
+          o.x = pos.x;
+          o.y = pos.y;
+          if (now - o.beep > 300) { o.beep = now; this.sfx.beep(); }
+          if (now >= o.at) { this.objects.splice(i, 1); this.explode(o.x, Math.min(o.y, this.H - 4), 'c4', now); }
+          continue;
+        }
+        if (o.kind === 'trou') {
+          b.radial(o.x, o.y, -70, 460);
+          b.knock(now, 500);
+          for (let k = 0; k < 2; k++) {
+            const a = rand(0, Math.PI * 2), r = rand(90, 160);
+            this.spawn({ type: 'spark', x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r, vx: -Math.cos(a) * 300, vy: -Math.sin(a) * 300, life: 0.4, max: 0.4 });
+          }
+          if (now >= o.until) { this.objects.splice(i, 1); this.explode(o.x, o.y, 'trounoir', now); }
+          continue;
+        }
+        if (o.kind === 'meteor') {
+          o.x += o.vx * DT;
+          o.y += o.vy * DT;
+          const life = rand(0.3, 0.5);
+          this.spawn({ type: 'fire', x: o.x, y: o.y, vx: rand(-40, 40), vy: rand(-80, 0), r: rand(8, 14), grow: 30, life, max: life });
+          if (o.y >= this.H - 12 || b.hitTest(o.x, o.y, 8 * b.s)) {
+            this.objects.splice(i, 1);
+            this.explode(o.x, Math.min(o.y, this.H - 10), 'meteorite', now);
           }
           continue;
         }
@@ -4200,7 +4743,9 @@ globalThis.BUFFET_FIREBASE = {
       if (m.down) {
         if (this.settings.weapon === 'mitraillette' && this.every('smg', 85 * this.m('rate'), now)) this.shoot('mitraillette', now);
         if (this.settings.weapon === 'flamme') this.flamethrower(now);
-        if (this.settings.weapon === 'katana' || this.settings.weapon === 'batte') this.swipe(now);
+        if (SWIPE[this.settings.weapon]) this.swipe(now);
+        const hold = PROJ[this.settings.weapon];
+        if (hold?.hold && this.every('shot', hold.cd * this.m('rate'), now)) this.throwProj(this.settings.weapon, m.x, m.y);
         if (this.settings.weapon === 'minigun' && now - this.spinStart > 250 && this.every('mg', 45 * this.m('rate'), now)) this.shoot('minigun', now);
         if (this.settings.weapon === 'tronconneuse') this.chainsaw(now);
         if (this.settings.weapon === 'laser') this.laser(now);
@@ -4222,6 +4767,19 @@ globalThis.BUFFET_FIREBASE = {
         }
       }
 
+      if (now < (this.shockUntil || 0)) {
+        for (let k = 0; k < 3; k++) {
+          const p = b.p[D.pick(Object.keys(b.p))];
+          b.impulse(p.x, p.y, rand(-400, 400), rand(-400, 200), 30 * b.s);
+          if (Math.random() < 0.5) this.spawn({ type: 'spark', x: p.x, y: p.y, vx: rand(-200, 200), vy: rand(-250, 50), life: 0.25, max: 0.25 });
+        }
+        b.knock(now, 300);
+      }
+      if (this.harpoon && now < this.harpoon.until && b.p[this.harpoon.name]) {
+        const g = this.gun(), p = b.p[this.harpoon.name];
+        const dx = g.x - p.x, dy = g.y - p.y, d = Math.hypot(dx, dy) || 1;
+        if (d > 160) b.impulse(p.x, p.y, (dx / d) * 260, (dy / d) * 260 - 60, 80 * b.s);
+      }
       if (now < this.burnUntil) {
         const names = Object.keys(b.p);
         const p = b.p[D.pick(names)];
@@ -4291,6 +4849,13 @@ globalThis.BUFFET_FIREBASE = {
         ctx.fillRect(0, 0, W, H);
       }
       if (this.beam && now < this.beam.until) this.drawBeam(ctx, this.beam);
+      if (this.bolt && now < this.bolt.until) this.drawBolt(ctx, this.bolt);
+      if (this.harpoon && now < this.harpoon.until && this.body.p[this.harpoon.name]) {
+        const g = this.gun(), p = this.body.p[this.harpoon.name];
+        ctx.strokeStyle = '#a8a29e';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(g.nx, g.ny); ctx.lineTo(p.x, p.y); ctx.stroke();
+      }
       if (FIREARMS.has(this.settings.weapon)) this.drawGun(ctx);
       this.drawCursor(ctx);
     }
@@ -4341,6 +4906,25 @@ globalThis.BUFFET_FIREBASE = {
         ctx.beginPath(); ctx.roundRect(-16, -5, 26, 10, 3); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#dc2626';
         ctx.beginPath(); ctx.moveTo(10, -5); ctx.lineTo(21, 0); ctx.lineTo(10, 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else if (o.kind === 'proj') {
+        const cfg = PROJ[o.w], art = cfg.art || o.w, box = D.WEAPON_BOX[art];
+        ctx.rotate(cfg.spin ? o.rot : Math.atan2(o.vy, o.vx));
+        ctx.scale(cfg.size || 0.6, cfg.size || 0.6);
+        ctx.translate(-(box.x + box.w / 2), -(box.y + box.h / 2));
+        D.drawWeapon(ctx, art);
+      } else if (o.kind === 'c4att') {
+        ctx.scale(0.7, 0.7);
+        D.drawWeapon(ctx, 'c4');
+        if (Math.floor(now / 150) % 2) this.disc(ctx, 0, -3, 5, '#ef4444');
+      } else if (o.kind === 'trou') {
+        const pulse = 1 + Math.sin(now / 80) * 0.08;
+        this.disc(ctx, 0, 0, 60 * pulse, 'rgba(88,28,135,.25)');
+        this.disc(ctx, 0, 0, 34 * pulse, 'rgba(168,85,247,.45)');
+        this.disc(ctx, 0, 0, 22, '#020617');
+      } else if (o.kind === 'meteor') {
+        ctx.rotate(Math.atan2(o.vy, o.vx));
+        ctx.scale(1.8, 1.8);
+        D.drawWeapon(ctx, 'meteorite');
       } else if (o.kind === 'carreau') {
         ctx.rotate(Math.atan2(o.vy, o.vx));
         ctx.strokeStyle = '#a16207';
@@ -4631,6 +5215,25 @@ globalThis.BUFFET_FIREBASE = {
       ctx.restore();
     }
 
+    drawBolt(ctx, bolt) {
+      const pts = [[bolt.x1, 0]];
+      for (let i = 1; i < 12; i++) {
+        const t = i / 12;
+        pts.push([bolt.x1 + (bolt.x2 - bolt.x1) * t + (D.rnd(bolt.seed + i) - 0.5) * 70, bolt.y2 * t]);
+      }
+      pts.push([bolt.x2, bolt.y2]);
+      ctx.save();
+      ctx.lineJoin = 'round';
+      for (const [color, w] of [['rgba(253,224,71,.45)', 12], ['#fde047', 5], ['#fff', 2]]) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = w;
+        ctx.beginPath();
+        pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     drawBeam(ctx, beam) {
       const w = beam.width;
       ctx.save();
@@ -4647,14 +5250,14 @@ globalThis.BUFFET_FIREBASE = {
     drawCursor(ctx) {
       const m = this.mouse, w = this.settings.weapon;
       if (m.x < -500 || w === 'main') return;
-      if (FIREARMS.has(w) || w === 'frappe') {
+      if (FIREARMS.has(w) || w === 'frappe' || w === 'foudre' || w === 'meteorite') {
         this.drawCrosshair(ctx, m.x, m.y);
         return;
       }
-      if (w === 'katana' || w === 'tronconneuse' || w === 'batte' || w === 'masse') {
+      if (SWIPE[w] || w === 'tronconneuse' || w === 'masse') {
         // Le bout de la lame est sur le curseur.
         const box = D.WEAPON_BOX[w];
-        const ang = w === 'katana' || w === 'batte' ? this.bladeAng : w === 'masse' ? -0.6 - 0.6 * (this.massSwing || 0) : -0.5;
+        const ang = SWIPE[w] ? this.bladeAng : w === 'masse' ? -0.6 - 0.6 * (this.massSwing || 0) : -0.5;
         const jitter = w === 'tronconneuse' && m.down ? rand(-2, 2) : 0;
         ctx.save();
         ctx.translate(m.x + jitter, m.y + jitter);
